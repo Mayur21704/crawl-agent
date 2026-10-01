@@ -3,9 +3,19 @@ HTML Localizer and Link Rewriter
 Converts absolute internal URLs to depth-aware relative offline links (./about/index.html, etc.)
 """
 import os
+import sys
+
+_pipelines_dir = os.path.dirname(os.path.abspath(__file__))
+if _pipelines_dir not in sys.path:
+    sys.path.insert(0, _pipelines_dir)
+
+import os
 import re
 import urllib.parse
-from .common_utils import is_same_domain
+try:
+    from .common_utils import is_same_domain
+except (ImportError, ValueError):
+    from common_utils import is_same_domain
 
 def url_to_local_rel_path(url, base_url):
     parsed = urllib.parse.urlparse(url)

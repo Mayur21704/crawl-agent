@@ -9,10 +9,20 @@ Extracts:
 - Favicons, touch icons, manifest icons
 """
 import os
+import sys
+
+_pipelines_dir = os.path.dirname(os.path.abspath(__file__))
+if _pipelines_dir not in sys.path:
+    sys.path.insert(0, _pipelines_dir)
+
+import os
 import re
 import urllib.parse
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from .common_utils import safe_download_file, sanitize_filename
+try:
+    from .common_utils import safe_download_file, sanitize_filename
+except (ImportError, ValueError):
+    from common_utils import safe_download_file, sanitize_filename
 
 def extract_all_image_urls(html_text, page_url):
     urls = set()

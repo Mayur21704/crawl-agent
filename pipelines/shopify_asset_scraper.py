@@ -3,9 +3,19 @@ Shopify CDN Asset Scraper
 Identifies cdn.shopify.com stylesheets, product images, and theme scripts and localizes them.
 """
 import os
+import sys
+
+_pipelines_dir = os.path.dirname(os.path.abspath(__file__))
+if _pipelines_dir not in sys.path:
+    sys.path.insert(0, _pipelines_dir)
+
+import os
 import re
 import urllib.parse
-from .common_utils import safe_download_file, sanitize_filename
+try:
+    from .common_utils import safe_download_file, sanitize_filename
+except (ImportError, ValueError):
+    from common_utils import safe_download_file, sanitize_filename
 
 SHOPIFY_CDN_PATTERN = re.compile(r'https?://cdn\.shopify\.com/[a-zA-Z0-9_\-\.\/]+', re.IGNORECASE)
 

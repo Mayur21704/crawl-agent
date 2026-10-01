@@ -3,9 +3,19 @@ Framer Sites Dynamic Chunk & Vector Extractor
 Detects and downloads framerusercontent.com assets, dynamic motion chunks, and react bundles.
 """
 import os
+import sys
+
+_pipelines_dir = os.path.dirname(os.path.abspath(__file__))
+if _pipelines_dir not in sys.path:
+    sys.path.insert(0, _pipelines_dir)
+
+import os
 import re
 import urllib.parse
-from .common_utils import safe_download_file, sanitize_filename
+try:
+    from .common_utils import safe_download_file, sanitize_filename
+except (ImportError, ValueError):
+    from common_utils import safe_download_file, sanitize_filename
 
 FRAMER_ASSET_PATTERN = re.compile(r'https?://[a-zA-Z0-9_\-\.]*framerusercontent\.com/[a-zA-Z0-9_\-\.\/]+', re.IGNORECASE)
 

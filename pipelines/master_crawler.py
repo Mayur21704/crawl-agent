@@ -15,24 +15,70 @@ Emits live JSON progress updates to stdout for interactive dashboards.
 """
 import os
 import sys
+
+_pipelines_dir = os.path.dirname(os.path.abspath(__file__))
+if _pipelines_dir not in sys.path:
+    sys.path.insert(0, _pipelines_dir)
+
+import os
+import sys
 import json
 import time
 import argparse
 import urllib.parse
 
-from .common_utils import sanitize_filename, fetch_url
-from .page_spider import crawl_site_pages
-from .html_localizer import localize_html_links, url_to_local_rel_path
-from .css_crawler import crawl_stylesheets
-from .js_crawler import crawl_scripts
-from .chunk_extractor import extract_dynamic_chunks
-from .image_scraper import extract_all_image_urls, download_images
-from .font_downloader import download_html_fonts
-from .media_downloader import download_media
-from .badge_stripper import strip_promos_and_trackers
-from .unquote_cleaner import clean_unquoted_files
-from .asset_auditor import audit_and_heal_assets
-from .verify_clone import verify_clone_health
+try:
+    from .common_utils import sanitize_filename, fetch_url
+except (ImportError, ValueError):
+    from common_utils import sanitize_filename, fetch_url
+try:
+    from .page_spider import crawl_site_pages
+except (ImportError, ValueError):
+    from page_spider import crawl_site_pages
+try:
+    from .html_localizer import localize_html_links, url_to_local_rel_path
+except (ImportError, ValueError):
+    from html_localizer import localize_html_links, url_to_local_rel_path
+try:
+    from .css_crawler import crawl_stylesheets
+except (ImportError, ValueError):
+    from css_crawler import crawl_stylesheets
+try:
+    from .js_crawler import crawl_scripts
+except (ImportError, ValueError):
+    from js_crawler import crawl_scripts
+try:
+    from .chunk_extractor import extract_dynamic_chunks
+except (ImportError, ValueError):
+    from chunk_extractor import extract_dynamic_chunks
+try:
+    from .image_scraper import extract_all_image_urls, download_images
+except (ImportError, ValueError):
+    from image_scraper import extract_all_image_urls, download_images
+try:
+    from .font_downloader import download_html_fonts
+except (ImportError, ValueError):
+    from font_downloader import download_html_fonts
+try:
+    from .media_downloader import download_media
+except (ImportError, ValueError):
+    from media_downloader import download_media
+try:
+    from .badge_stripper import strip_promos_and_trackers
+except (ImportError, ValueError):
+    from badge_stripper import strip_promos_and_trackers
+try:
+    from .unquote_cleaner import clean_unquoted_files
+except (ImportError, ValueError):
+    from unquote_cleaner import clean_unquoted_files
+try:
+    from .asset_auditor import audit_and_heal_assets
+except (ImportError, ValueError):
+    from asset_auditor import audit_and_heal_assets
+try:
+    from .verify_clone import verify_clone_health
+except (ImportError, ValueError):
+    from verify_clone import verify_clone_health
 
 def emit_progress(percent, stage, pages=0, assets=0):
     progress_info = {

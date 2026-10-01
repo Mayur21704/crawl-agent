@@ -4,9 +4,19 @@ Downloads all external stylesheets, extracts @import rules,
 finds background images, SVGs, and webfonts from url(...), downloads them and rewrites paths.
 """
 import os
+import sys
+
+_pipelines_dir = os.path.dirname(os.path.abspath(__file__))
+if _pipelines_dir not in sys.path:
+    sys.path.insert(0, _pipelines_dir)
+
+import os
 import re
 import urllib.parse
-from .common_utils import fetch_url, safe_download_file, sanitize_filename
+try:
+    from .common_utils import fetch_url, safe_download_file, sanitize_filename
+except (ImportError, ValueError):
+    from common_utils import fetch_url, safe_download_file, sanitize_filename
 
 CSS_URL_PATTERN = re.compile(r'url\(\s*["\']?([^"\'\)]+)["\']?\s*\)', re.IGNORECASE)
 IMPORT_PATTERN = re.compile(r'@import\s+(?:url\()?\s*["\']?([^"\'\)\s;]+)["\']?\s*\)?;?', re.IGNORECASE)

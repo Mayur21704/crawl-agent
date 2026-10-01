@@ -4,9 +4,19 @@ Reads all crawled HTML & CSS files, tests every asset reference against disk,
 and auto-downloads any missing files directly from origin.
 """
 import os
+import sys
+
+_pipelines_dir = os.path.dirname(os.path.abspath(__file__))
+if _pipelines_dir not in sys.path:
+    sys.path.insert(0, _pipelines_dir)
+
+import os
 import re
 import urllib.parse
-from .common_utils import safe_download_file, sanitize_filename
+try:
+    from .common_utils import safe_download_file, sanitize_filename
+except (ImportError, ValueError):
+    from common_utils import safe_download_file, sanitize_filename
 
 def audit_and_heal_assets(base_url, dest_dir):
     print(f"[ASSET AUDITOR] Scanning {dest_dir} for missing assets...")

@@ -47,7 +47,7 @@ export async function crawlWebsite({ url, outputDir, crawlId, onProgress = () =>
     const pythonScript = path.join(PROJECT_ROOT, 'pipelines', 'master_crawler.py');
     const pyCmd = getPythonCommand();
     console.log(`[CRAWLER] Using Python binary: ${pyCmd}`);
-    const child = spawn(pyCmd, [pythonScript, url, outputDir, '--max-pages', '35'], {
+    const child = spawn(pyCmd, ['-m', 'pipelines.master_crawler', url, outputDir, '--max-pages', '35'], {
       cwd: PROJECT_ROOT,
       env: process.env
     });

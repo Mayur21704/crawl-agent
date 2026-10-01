@@ -3,9 +3,19 @@ JavaScript Bundle & Vendor Library Crawler
 Downloads all scripts (custom, framework, jQuery, GSAP, Webflow runtime, Lenis) into js/
 """
 import os
+import sys
+
+_pipelines_dir = os.path.dirname(os.path.abspath(__file__))
+if _pipelines_dir not in sys.path:
+    sys.path.insert(0, _pipelines_dir)
+
+import os
 import re
 import urllib.parse
-from .common_utils import safe_download_file, sanitize_filename
+try:
+    from .common_utils import safe_download_file, sanitize_filename
+except (ImportError, ValueError):
+    from common_utils import safe_download_file, sanitize_filename
 
 def crawl_scripts(html_text, page_url, dest_dir):
     js_dir = os.path.join(dest_dir, 'js')

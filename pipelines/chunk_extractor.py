@@ -3,9 +3,19 @@ Webpack & Dynamic Runtime Chunks Extractor
 Scans downloaded JS bundles for dynamic chunks, split code, and async workers
 """
 import os
+import sys
+
+_pipelines_dir = os.path.dirname(os.path.abspath(__file__))
+if _pipelines_dir not in sys.path:
+    sys.path.insert(0, _pipelines_dir)
+
+import os
 import re
 import urllib.parse
-from .common_utils import safe_download_file
+try:
+    from .common_utils import safe_download_file
+except (ImportError, ValueError):
+    from common_utils import safe_download_file
 
 CHUNK_PATTERNS = [
     re.compile(r'["\']([a-zA-Z0-9_\-\.\/]+(?:chunk|achunk|worker)[a-zA-Z0-9_\-\.]*\.js)["\']'),

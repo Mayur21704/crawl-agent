@@ -2,10 +2,23 @@
 Recursive Multi-Page Crawler Spider
 Crawls homepage and follows internal links to discover all pages (about, services, contact, etc.)
 """
+import os
+import sys
+
+_pipelines_dir = os.path.dirname(os.path.abspath(__file__))
+if _pipelines_dir not in sys.path:
+    sys.path.insert(0, _pipelines_dir)
+
 import re
 import urllib.parse
-from .common_utils import fetch_url, is_same_domain
-from .sitemap_parser import discover_sitemap_urls
+try:
+    from .common_utils import fetch_url, is_same_domain
+except (ImportError, ValueError):
+    from common_utils import fetch_url, is_same_domain
+try:
+    from .sitemap_parser import discover_sitemap_urls
+except (ImportError, ValueError):
+    from sitemap_parser import discover_sitemap_urls
 
 def extract_internal_links(html_text, page_url, base_url):
     links = set()

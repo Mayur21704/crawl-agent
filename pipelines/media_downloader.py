@@ -3,9 +3,19 @@ Self-hosted Media & Video Downloader
 Finds <video>, <source>, <audio> files (.mp4, .webm, .mp3) and downloads them locally
 """
 import os
+import sys
+
+_pipelines_dir = os.path.dirname(os.path.abspath(__file__))
+if _pipelines_dir not in sys.path:
+    sys.path.insert(0, _pipelines_dir)
+
+import os
 import re
 import urllib.parse
-from .common_utils import safe_download_file, sanitize_filename
+try:
+    from .common_utils import safe_download_file, sanitize_filename
+except (ImportError, ValueError):
+    from common_utils import safe_download_file, sanitize_filename
 
 def download_media(html_text, page_url, dest_dir):
     media_dir = os.path.join(dest_dir, 'media')

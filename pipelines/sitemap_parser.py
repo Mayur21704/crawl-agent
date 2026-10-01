@@ -2,10 +2,20 @@
 Sitemap and robots.txt discovery parser
 Discovers all available URLs from robots.txt, sitemap.xml, and sub-sitemaps
 """
+import os
+import sys
+
+_pipelines_dir = os.path.dirname(os.path.abspath(__file__))
+if _pipelines_dir not in sys.path:
+    sys.path.insert(0, _pipelines_dir)
+
 import re
 import urllib.parse
 import xml.etree.ElementTree as ET
-from .common_utils import fetch_url, is_same_domain
+try:
+    from .common_utils import fetch_url, is_same_domain
+except (ImportError, ValueError):
+    from common_utils import fetch_url, is_same_domain
 
 def discover_sitemap_urls(base_url):
     discovered_urls = set()
