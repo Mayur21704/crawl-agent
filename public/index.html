@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AETHER // Autonomous Website Scout & Webflow Deep Crawler</title>
+  
+  <!-- Premium Modern Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body class="light-theme">
+  <!-- Vibrant Colorful Ambient Gradients -->
+  <div class="mesh-glow mesh-indigo"></div>
+  <div class="mesh-glow mesh-cyan"></div>
+  <div class="mesh-glow mesh-rose"></div>
+
+  <div class="app-layout">
+    <!-- Top Navigation Bar -->
+    <header class="app-navbar">
+      <div class="nav-container">
+        <div class="brand-group">
+          <div class="brand-orb">
+            <span class="orb-icon">✨</span>
+          </div>
+          <div class="brand-text">
+            <div class="brand-title-row">
+              <h1 class="brand-name">AETHER</h1>
+              <span class="badge-version">v2.0 AUTONOMOUS</span>
+            </div>
+            <p class="brand-subtitle">Smart Website Scout & Webflow Crawler</p>
+          </div>
+        </div>
+
+        <!-- Global Metrics -->
+        <div class="nav-metrics">
+          <div class="metric-pill pill-indigo">
+            <span class="metric-label">INDUSTRIES</span>
+            <span class="metric-val" id="metric-industries">5</span>
+          </div>
+          <div class="metric-pill pill-sky">
+            <span class="metric-label">CANDIDATES</span>
+            <span class="metric-val" id="metric-candidates">10</span>
+          </div>
+          <div class="metric-pill pill-emerald">
+            <span class="metric-label">APPROVED</span>
+            <span class="metric-val" id="metric-approved">0</span>
+          </div>
+        </div>
+
+        <!-- Header Actions -->
+        <div class="nav-actions">
+          <button id="btn-scout" class="btn btn-scout">
+            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <span>Run Resilient Scout</span>
+          </button>
+          
+          <button id="btn-crawl" class="btn btn-primary">
+            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+            </svg>
+            <span>Start Deep Crawl</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Real-time Agent Status Banner (Animated) -->
+    <div id="status-strip" class="status-strip hidden">
+      <div class="status-strip-content">
+        <div class="pulse-beacon">
+          <span class="beacon-dot"></span>
+          <span class="beacon-wave"></span>
+        </div>
+        <div class="status-info">
+          <span id="status-title" class="status-headline">Agent Active</span>
+          <span id="status-desc" class="status-sub">Exploring candidates and checking HTTP 200 health...</span>
+        </div>
+        <div class="progress-track">
+          <div id="progress-bar" class="progress-fill" style="width: 0%"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content Canvas -->
+    <main class="main-canvas">
+      <!-- Controls & Filter Toolbar -->
+      <section class="toolbar-section">
+        <div class="toolbar-left">
+          <div class="filter-tab-group">
+            <button class="filter-tab active" data-filter="all">All Industries</button>
+            <button class="filter-tab" data-filter="approved">Approved Sites</button>
+            <button class="filter-tab" data-filter="pending">Pending Review</button>
+          </div>
+        </div>
+        <div class="toolbar-right">
+          <div class="legend-group">
+            <span class="legend-badge badge-ok"><span class="badge-dot"></span> Verified 200 OK</span>
+            <span class="legend-badge badge-ai"><span class="badge-dot"></span> AI Quality Analyzed</span>
+            <span class="legend-badge badge-static"><span class="badge-dot"></span> 100% Static HTML</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Industries Grid Container -->
+      <section id="industries-container" class="industries-container">
+        <div class="loader-skeleton">
+          <div class="spinner-ring"></div>
+          <p>Syncing neural discovery engine & candidates...</p>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <div class="footer-content">
+        <span>AETHER Autonomous Pipeline • 100% Relative Static Deployment • Zero Python Server Files</span>
+        <span class="footer-tag">Playwright Network Interception • Google Gemini Multimodal</span>
+      </div>
+    </footer>
+  </div>
+
+  <!-- HD Screenshot Lightbox Modal -->
+  <div id="screenshot-modal" class="modal-backdrop hidden">
+    <div class="modal-glass-container">
+      <div class="modal-header">
+        <div class="modal-header-info">
+          <span class="modal-badge">FULL RESOLUTION PREVIEW</span>
+          <h3 id="modal-title" class="modal-title">Website Preview</h3>
+        </div>
+        <button id="modal-close" class="modal-close-btn" aria-label="Close modal">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <img id="modal-img" src="" alt="High resolution preview" class="modal-image">
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification System -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <script src="/app.js"></script>
+</body>
+</html>

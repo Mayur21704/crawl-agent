@@ -1,0 +1,173 @@
+{
+  "industries": [
+    {
+      "id": "electrician",
+      "name": "Electrician",
+      "query": "electrician electrical contractor modern architectural lighting",
+      "status": "scouted",
+      "updated_at": "2026-10-01T10:12:24.717Z"
+    },
+    {
+      "id": "hvac",
+      "name": "Heating & Cooling",
+      "query": "hvac heating cooling climate control luxury air conditioning",
+      "status": "scouted",
+      "updated_at": "2026-10-01T10:12:32.126Z"
+    },
+    {
+      "id": "home-services",
+      "name": "Home Services",
+      "query": "home services luxury general contractor architectural renovation",
+      "status": "scouted",
+      "updated_at": "2026-10-01T10:12:39.674Z"
+    },
+    {
+      "id": "concrete-paving",
+      "name": "Concrete & Paving",
+      "query": "concrete paving hardscaping modern architectural driveway stone",
+      "status": "scouted",
+      "updated_at": "2026-10-01T10:12:51.332Z"
+    },
+    {
+      "id": "dentist",
+      "name": "Dentist",
+      "query": "dentist dental clinic aesthetic orthodontics luxury studio",
+      "status": "scouted",
+      "updated_at": "2026-10-01T10:13:01.534Z"
+    }
+  ],
+  "candidates": [
+    {
+      "id": 1790849545011,
+      "industry_id": "electrician",
+      "url": "https://spark-electric.webflow.io",
+      "rank": 1,
+      "title": "Electrician Services For Businesses & Facilities in NH | Spark Electric",
+      "screenshot_path": "/screenshots/electrician_1.jpg",
+      "score": 8,
+      "notes": "Evaluated via heuristic fallback: Electrician Services For Businesses & Facilities in NH | Spark Electric",
+      "approved": 1,
+      "status": "restored",
+      "history": [
+        {
+          "url": "https://showcased.webflow.io",
+          "title": "Webflow Showcase - Free Webflow Cloneables",
+          "screenshot_path": "/screenshots/electrician_1_1790849963585.jpg",
+          "score": 8,
+          "notes": "Evaluated via heuristic fallback: Webflow Showcase - Free Webflow Cloneables",
+          "scanned_at": "2026-10-01T10:19:32.736Z"
+        }
+      ],
+      "scanned_at": "2026-10-01T10:19:25.118Z"
+    },
+    {
+      "id": 1790849545115,
+      "industry_id": "electrician",
+      "url": "https://volt-template.webflow.io",
+      "rank": 2,
+      "title": "Volt Template",
+      "screenshot_path": "/screenshots/electrician_2.jpg",
+      "score": 8,
+      "notes": "Evaluated via heuristic fallback: Volt Template",
+      "approved": 1,
+      "status": "scouted"
+    },
+    {
+      "id": 1790849552865,
+      "industry_id": "hvac",
+      "url": "https://rls-appliances-repair-hvac.webflow.io",
+      "rank": 1,
+      "title": "RLS | Appliances repair and HVAC",
+      "screenshot_path": "/screenshots/hvac_1.jpg",
+      "score": 8,
+      "notes": "Evaluated via heuristic fallback: RLS | Appliances repair and HVAC",
+      "approved": 1,
+      "status": "scouted"
+    },
+    {
+      "id": 1790849552491,
+      "industry_id": "hvac",
+      "url": "https://coverd.webflow.io",
+      "rank": 2,
+      "title": "CoVerd - Webflow HTML Website Template",
+      "screenshot_path": "/screenshots/hvac_2.jpg",
+      "score": 8,
+      "notes": "Evaluated via heuristic fallback: CoVerd - Webflow HTML Website Template",
+      "approved": 1,
+      "status": "scouted"
+    },
+    {
+      "id": 1790849559959,
+      "industry_id": "home-services",
+      "url": "https://builderx-template.webflow.io",
+      "rank": 1,
+      "title": "BuilderX - Webflow Ecommerce website template",
+      "screenshot_path": "/screenshots/home-services_1.jpg",
+      "score": 8,
+      "notes": "Evaluated via heuristic fallback: BuilderX - Webflow Ecommerce website template",
+      "approved": 1,
+      "status": "scouted"
+    },
+    {
+      "id": 1790849560509,
+      "industry_id": "home-services",
+      "url": "https://demure-template.webflow.io",
+      "rank": 2,
+      "title": "Demure - Webflow HTML website template",
+      "screenshot_path": "/screenshots/home-services_2.jpg",
+      "score": 8,
+      "notes": "Evaluated via heuristic fallback: Demure - Webflow HTML website template",
+      "approved": 1,
+      "status": "scouted"
+    },
+    {
+      "id": 1790849571426,
+      "industry_id": "concrete-paving",
+      "url": "https://www.hardscape.co.uk",
+      "rank": 1,
+      "title": "Hardscape | Commercial Stone & Paving | Inspired Urban Spaces",
+      "screenshot_path": "/screenshots/concrete-paving_1.jpg",
+      "score": 8,
+      "notes": "Evaluated via heuristic fallback: Hardscape | Commercial Stone & Paving | Inspired Urban Spaces",
+      "approved": 1,
+      "status": "scouted"
+    },
+    {
+      "id": 1790849572137,
+      "industry_id": "concrete-paving",
+      "url": "https://unilock.com",
+      "rank": 2,
+      "title": "Hardscape Design Ideas for Outdoor Spaces | Unilock",
+      "screenshot_path": "/screenshots/concrete-paving_2.jpg",
+      "score": 8,
+      "notes": "Evaluated via heuristic fallback: Hardscape Design Ideas for Outdoor Spaces | Unilock",
+      "approved": 1,
+      "status": "scouted"
+    },
+    {
+      "id": 1790849582121,
+      "industry_id": "dentist",
+      "url": "https://lumina-dental.webflow.io",
+      "rank": 1,
+      "title": "Lumina Dental",
+      "screenshot_path": "/screenshots/dentist_1.jpg",
+      "score": 8,
+      "notes": "Evaluated via heuristic fallback: Lumina Dental",
+      "approved": 1,
+      "status": "scouted"
+    },
+    {
+      "id": 1790849581728,
+      "industry_id": "dentist",
+      "url": "https://grandstreetdental.com",
+      "rank": 2,
+      "title": "Dentist in Brooklyn & Williamsburg | Best Dentist Near Me",
+      "screenshot_path": "/screenshots/dentist_2.jpg",
+      "score": 8,
+      "notes": "Evaluated via heuristic fallback: Dentist in Brooklyn & Williamsburg | Best Dentist Near Me",
+      "approved": 1,
+      "status": "scouted"
+    }
+  ],
+  "crawls": []
+}

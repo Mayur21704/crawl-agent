@@ -1,0 +1,32 @@
+[
+  {
+    "id": "electrician",
+    "name": "Electrician",
+    "query": "electrician electrical contractor modern architectural lighting",
+    "status": "pending"
+  },
+  {
+    "id": "hvac",
+    "name": "Heating & Cooling",
+    "query": "hvac heating cooling climate control luxury air conditioning",
+    "status": "pending"
+  },
+  {
+    "id": "home-services",
+    "name": "Home Services",
+    "query": "home services luxury general contractor architectural renovation",
+    "status": "pending"
+  },
+  {
+    "id": "concrete-paving",
+    "name": "Concrete & Paving",
+    "query": "concrete paving hardscaping modern architectural driveway stone",
+    "status": "pending"
+  },
+  {
+    "id": "dentist",
+    "name": "Dentist",
+    "query": "dentist dental clinic aesthetic orthodontics luxury studio",
+    "status": "pending"
+  }
+]
