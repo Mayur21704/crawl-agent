@@ -1,3 +1,4 @@
+import fs from 'fs';
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
@@ -21,6 +22,7 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 app.use(express.static(PUBLIC_DIR));
+app.use('/crawled', express.static(OUTPUT_DIR));
 
 // Initialize database
 initDb();
@@ -28,6 +30,7 @@ initDb();
 let isScouting = false;
 let isCrawling = false;
 let currentCrawlProgress = { total: 0, current: 0, currentUrl: '', status: 'idle' };
+const activeCrawlJobs = {};
 
 // Redirect root to /review
 app.get('/', (req, res) => {
@@ -47,7 +50,8 @@ app.get('/api/industries', (req, res) => {
       industries: data,
       isScouting,
       isCrawling,
-      crawlProgress: currentCrawlProgress
+      crawlProgress: currentCrawlProgress,
+      activeCrawlJobs
     });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
@@ -120,22 +124,64 @@ app.post('/api/scout/start', async (req, res) => {
   }
 });
 
-// API: Crawl Single Candidate
+// API: Crawl Single Candidate with Live Progress Tracking
 app.post('/api/crawl/single', async (req, res) => {
-  const { industryId, rank, url } = req.body;
+  const { candidateId, industryId, rank, url } = req.body;
   if (!industryId || !rank || !url) {
     return res.status(400).json({ success: false, error: 'industryId, rank, and url are required' });
   }
 
   const targetDir = path.join(OUTPUT_DIR, industryId, `website-${rank}`);
-  res.json({ success: true, message: `Started crawl for ${url} -> ${targetDir}` });
+  const previewUrl = `/crawled/${industryId}/website-${rank}/index.html`;
 
-  try {
-    const crawlId = createCrawlJob(industryId, rank, url, targetDir);
-    await crawlWebsite({ url, outputDir: targetDir, crawlId });
-  } catch (err) {
-    console.error('[SERVER] Single crawl error:', err);
+  if (candidateId) {
+    activeCrawlJobs[candidateId] = {
+      percent: 5,
+      stage: 'Starting crawl...',
+      assetCount: 0,
+      status: 'running',
+      previewUrl
+    };
   }
+
+  res.json({ success: true, message: `Started crawl for ${url}` });
+
+  (async () => {
+    try {
+      const crawlId = createCrawlJob(industryId, rank, url, targetDir);
+      await crawlWebsite({
+        url,
+        outputDir: targetDir,
+        crawlId,
+        onProgress: (prog) => {
+          if (candidateId) {
+            activeCrawlJobs[candidateId] = {
+              ...prog,
+              status: prog.completed ? (prog.error ? 'error' : 'completed') : 'running',
+              previewUrl
+            };
+          }
+        }
+      });
+    } catch (err) {
+      console.error('[SERVER] Single crawl error:', err);
+      if (candidateId) {
+        activeCrawlJobs[candidateId] = {
+          percent: 100,
+          stage: `Error: ${err.message}`,
+          status: 'error',
+          error: err.message
+        };
+      }
+    }
+  })();
+});
+
+// API: Get crawl progress for a specific candidate
+app.get('/api/crawl/progress/:candidateId', (req, res) => {
+  const candId = req.params.candidateId;
+  const progress = activeCrawlJobs[candId] || { percent: 0, stage: 'Idle', status: 'idle' };
+  res.json({ success: true, ...progress });
 });
 
 // API: Trigger Deep Crawl Phase for all approved candidates
@@ -215,6 +261,30 @@ app.post('/api/candidate/restore', (req, res) => {
     const ok = restoreCandidateFromHistory(candidateId, historyIndex);
     res.json({ success: ok });
   } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// API: Delete Crawled Website Output Folder
+app.post('/api/crawl/delete', (req, res) => {
+  const { industryId, rank, candidateId } = req.body;
+  if (!industryId || !rank) {
+    return res.status(400).json({ success: false, error: 'industryId and rank are required' });
+  }
+
+  const targetDir = path.join(OUTPUT_DIR, industryId, `website-${rank}`);
+  console.log(`[SERVER] Deleting crawled website: ${targetDir}`);
+
+  try {
+    if (fs.existsSync(targetDir)) {
+      fs.rmSync(targetDir, { recursive: true, force: true });
+    }
+    if (candidateId && activeCrawlJobs[candidateId]) {
+      delete activeCrawlJobs[candidateId];
+    }
+    res.json({ success: true, message: `Successfully deleted crawled website for ${industryId}/website-${rank}` });
+  } catch (err) {
+    console.error('[SERVER] Delete crawl error:', err.message);
     res.status(500).json({ success: false, error: err.message });
   }
 });

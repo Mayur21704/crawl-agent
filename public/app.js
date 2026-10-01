@@ -7,7 +7,8 @@ let state = {
   isScouting: false,
   isCrawling: false,
   crawlProgress: { total: 0, current: 0, currentUrl: '', status: 'idle' },
-  activeFilter: 'all'
+  activeFilter: 'all',
+  searchQuery: ''
 };
 
 const dom = {
@@ -26,7 +27,13 @@ const dom = {
   modalTitle: document.getElementById('modal-title'),
   modalClose: document.getElementById('modal-close'),
   toastContainer: document.getElementById('toast-container'),
-  filterButtons: document.querySelectorAll('.filter-tab')
+  filterButtons: document.querySelectorAll('.filter-tab'),
+  industrySearchInput: document.getElementById('industry-search-input'),
+  btnSearchIndustry: document.getElementById('btn-search-industry'),
+  btnClearSearch: document.getElementById('btn-clear-search'),
+  searchStatusBar: document.getElementById('search-status-bar'),
+  searchStatusText: document.getElementById('search-status-text'),
+  btnResetSearch: document.getElementById('btn-reset-search')
 };
 
 // Distinct vibrant icons & class names per industry
@@ -37,8 +44,72 @@ const INDUSTRY_CONFIG = {
   'concrete-paving': { icon: '🧱', iconClass: 'icon-concrete-paving' },
   dentist: { icon: '🦷', iconClass: 'icon-dentist' }
 };
+  // Industry Search Handlers
+  function performSearch() {
+    if (dom.industrySearchInput) {
+      const val = dom.industrySearchInput.value.trim();
+      state.searchQuery = val;
+      if (!val) {
+        if (dom.btnClearSearch) dom.btnClearSearch.classList.add('hidden');
+        if (dom.searchStatusBar) dom.searchStatusBar.classList.add('hidden');
+      } else {
+        if (dom.btnClearSearch) dom.btnClearSearch.classList.remove('hidden');
+      }
+      renderIndustries();
+      
+      if (val) {
+        const firstBlock = document.querySelector('.industry-block');
+        if (firstBlock) {
+          firstBlock.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
+    }
+  }
 
-// Initialize Application
+  window.clearIndustrySearch = function() {
+    if (dom.industrySearchInput) {
+      dom.industrySearchInput.value = '';
+    }
+    state.searchQuery = '';
+    if (dom.btnClearSearch) dom.btnClearSearch.classList.add('hidden');
+    if (dom.searchStatusBar) dom.searchStatusBar.classList.add('hidden');
+    renderIndustries();
+  };
+
+  if (dom.btnSearchIndustry) {
+    dom.btnSearchIndustry.addEventListener('click', performSearch);
+  }
+
+  if (dom.industrySearchInput) {
+    dom.industrySearchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        performSearch();
+      }
+    });
+
+    dom.industrySearchInput.addEventListener('input', (e) => {
+      const val = e.target.value.trim();
+      state.searchQuery = val;
+      if (!val) {
+        if (dom.btnClearSearch) dom.btnClearSearch.classList.add('hidden');
+        if (dom.searchStatusBar) dom.searchStatusBar.classList.add('hidden');
+      } else {
+        if (dom.btnClearSearch) dom.btnClearSearch.classList.remove('hidden');
+      }
+      renderIndustries();
+    });
+  }
+
+  if (dom.btnClearSearch) {
+    dom.btnClearSearch.addEventListener('click', window.clearIndustrySearch);
+  }
+
+  if (dom.btnResetSearch) {
+    dom.btnResetSearch.addEventListener('click', window.clearIndustrySearch);
+  }
+
+
+  // Initialize Application
 async function init() {
   bindEvents();
   await fetchState();
@@ -123,7 +194,7 @@ function updateStatusStrip() {
   }
 }
 
-// Render Industries & Candidate Bento Cards
+// Render Industries & Candidate Bento Cards with Search Filter
 function renderIndustries() {
   if (state.industries.length === 0) {
     dom.industriesContainer.innerHTML = `
@@ -133,9 +204,52 @@ function renderIndustries() {
     return;
   }
 
+  const query = (state.searchQuery || '').trim().toLowerCase();
+
+  // Filter industries matching search
+  let filteredIndustries = state.industries;
+  if (query) {
+    filteredIndustries = state.industries.filter(ind => {
+      const matchName = (ind.name || '').toLowerCase().includes(query);
+      const matchId = (ind.id || '').toLowerCase().includes(query);
+      const matchQuery = (ind.search_query || '').toLowerCase().includes(query);
+      const matchCandidate = (ind.candidates || []).some(c => 
+        (c.title || '').toLowerCase().includes(query) || 
+        (c.url || '').toLowerCase().includes(query)
+      );
+      return matchName || matchId || matchQuery || matchCandidate;
+    });
+
+    if (dom.searchStatusBar && dom.searchStatusText) {
+      dom.searchStatusBar.classList.remove('hidden');
+      dom.searchStatusText.textContent = `Showing ${filteredIndustries.length} ${filteredIndustries.length === 1 ? 'industry' : 'industries'} matching "${state.searchQuery}" (out of 52)`;
+    }
+    if (dom.btnClearSearch) {
+      dom.btnClearSearch.classList.remove('hidden');
+    }
+  } else {
+    if (dom.searchStatusBar) {
+      dom.searchStatusBar.classList.add('hidden');
+    }
+    if (dom.btnClearSearch) {
+      dom.btnClearSearch.classList.add('hidden');
+    }
+  }
+
+  if (filteredIndustries.length === 0) {
+    dom.industriesContainer.innerHTML = `
+      <div class="empty-search-state">
+        <div class="empty-search-icon">🔍</div>
+        <h3>No industries found matching "${state.searchQuery}"</h3>
+        <p>Try searching for "tattoo", "therapist", "electrician", "plumber", or "dentist".</p>
+        <button class="btn btn-primary" onclick="window.clearIndustrySearch()">Show All 52 Industries</button>
+      </div>`;
+    return;
+  }
+
   let html = '';
 
-  state.industries.forEach(ind => {
+  filteredIndustries.forEach(ind => {
     let candidatesToDisplay = ind.candidates;
     if (state.activeFilter === 'approved') {
       candidatesToDisplay = ind.candidates.filter(c => c.approved === 1);
@@ -236,6 +350,8 @@ function renderCandidateCard(industryId, cand) {
           <span style="font-size:11px; color:#94a3b8; font-family:monospace;">${cand.status === 'rescanned' ? '• Rescanned' : '• Verified'}</span>
         </div>
 
+        
+
         <!-- Expandable History Drawer -->
         <div class="history-drawer hidden" id="history-${cand.id}">
           <div class="history-drawer-header">
@@ -262,6 +378,35 @@ function renderCandidateCard(industryId, cand) {
           </div>
         </div>
 
+        <!-- Live Crawl Progress Box -->
+        <div class="card-crawl-box hidden" id="crawl-box-${cand.id}">
+          <div class="card-crawl-header">
+            <span class="card-crawl-stage" id="crawl-stage-${cand.id}">Initializing crawler...</span>
+            <span class="card-crawl-percent" id="crawl-percent-${cand.id}">0%</span>
+          </div>
+          <div class="card-crawl-track">
+            <div class="card-crawl-fill" id="crawl-fill-${cand.id}"></div>
+          </div>
+          <div class="card-crawl-actions" id="crawl-actions-${cand.id}" style="display:none;">
+            <span style="font-size:11px; color:#047857; font-weight:700;">✓ Pure Static HTML Saved</span>
+            <a href="/crawled/${industryId}/website-${cand.rank}/index.html" target="_blank" rel="noopener noreferrer" class="btn-open-crawled">
+              <span>Preview Crawled Site ↗</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Links & Comparison Strip -->
+        <div class="card-links-row">
+          <a href="${cand.url}" target="_blank" rel="noopener noreferrer" class="link-chip live-chip" title="Open original live website">
+            🌐 Live Original ↗
+          </a>
+          ${cand.isCrawled ? `
+          <a href="${cand.crawledUrl}" target="_blank" rel="noopener noreferrer" class="link-chip crawled-chip" title="Open local cloned website">
+            💾 Local Clone (${industryId}/website-${cand.rank}) ↗
+          </a>
+          ` : ''}
+        </div>
+
         <!-- Bottom Controls -->
         <div class="card-bottom-bar">
           <div class="switch-wrapper ${isApproved ? 'active' : ''}" onclick="toggleApproval('${cand.id}', ${isApproved ? 0 : 1})">
@@ -272,10 +417,18 @@ function renderCandidateCard(industryId, cand) {
           </div>
 
           <div class="card-actions-right">
-            <a href="${cand.url}" target="_blank" rel="noopener noreferrer" class="btn-visit">Visit Live ↗</a>
-            <button class="btn-crawl-card" onclick="crawlSingleSite('${industryId}', ${cand.rank}, '${cand.id}')">
-              <span>Crawl Site</span>
+            ${cand.isCrawled ? `
+            <button class="btn-recrawl" onclick="crawlSingleSite('${industryId}', ${cand.rank}, '${cand.id}')" title="Re-crawl this website">
+              <span>Re-crawl ⚡</span>
             </button>
+            <button class="btn-delete-action" onclick="openDeleteModal('${industryId}', ${cand.rank}, '${cand.id}', '${escapeQuotes(cand.title)}')" title="Delete crawled static files">
+              <span>🗑️ Delete</span>
+            </button>
+            ` : `
+            <button class="btn-crawl-primary" onclick="crawlSingleSite('${industryId}', ${cand.rank}, '${cand.id}')" title="Crawl this website">
+              <span>Crawl Site ⚡</span>
+            </button>
+            `}
           </div>
         </div>
       </div>
@@ -359,27 +512,74 @@ window.toggleApproval = async function(candId, newApproved) {
   }
 };
 
-// Crawl Single Candidate
+// Crawl Single Candidate with Real-Time Progress Bar
 window.crawlSingleSite = async function(industryId, rank, candId) {
   const input = document.getElementById(`url-${candId}`);
   const url = input.value.trim();
 
-  showToast(`Initiating crawl for Candidate #${rank}...`, 'info');
+  const box = document.getElementById(`crawl-box-${candId}`);
+  const stageLabel = document.getElementById(`crawl-stage-${candId}`);
+  const percentLabel = document.getElementById(`crawl-percent-${candId}`);
+  const fill = document.getElementById(`crawl-fill-${candId}`);
+  const actions = document.getElementById(`crawl-actions-${candId}`);
+
+  if (box) {
+    box.className = 'card-crawl-box';
+    box.classList.remove('hidden');
+    stageLabel.innerText = 'Initializing crawler...';
+    percentLabel.innerText = '5%';
+    fill.style.width = '5%';
+    if (actions) actions.style.display = 'none';
+  }
+
+  showToast(`Starting deep crawl for #${rank}: ${url}`, 'info');
 
   try {
     const res = await fetch('/api/crawl/single', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ industryId, rank, url })
+      body: JSON.stringify({ candidateId: candId, industryId, rank, url })
     });
     const data = await res.json();
-    if (data.success) {
-      showToast(data.message, 'success');
-    } else {
-      showToast(data.error || 'Crawl failed to start', 'error');
+    if (!data.success) {
+      showToast(data.error || 'Failed to start crawl', 'error');
+      return;
     }
+
+    // Poll live progress every 800ms
+    const pollInterval = setInterval(async () => {
+      try {
+        const progRes = await fetch(`/api/crawl/progress/${candId}`);
+        const prog = await progRes.json();
+
+        if (prog.success) {
+          const pct = prog.percent || 10;
+          fill.style.width = `${pct}%`;
+          percentLabel.innerText = `${pct}%`;
+          stageLabel.innerText = prog.stage || 'Capturing assets...';
+
+          if (prog.status === 'completed') {
+            clearInterval(pollInterval);
+            box.classList.add('completed');
+            fill.style.width = '100%';
+            percentLabel.innerText = '100%';
+            stageLabel.innerText = `✓ Completed! ${prog.assetCount || 0} assets saved.`;
+            if (actions) actions.style.display = 'flex';
+            showToast(`Crawl finished for #${rank}! Click 'Preview Crawled Site' to view.`, 'success');
+          } else if (prog.status === 'error') {
+            clearInterval(pollInterval);
+            box.classList.add('error');
+            stageLabel.innerText = `❌ Error: ${prog.error || 'Crawl failed'}`;
+            showToast(`Crawl error: ${prog.error}`, 'error');
+          }
+        }
+      } catch (err) {
+        // Continue polling
+      }
+    }, 900);
+
   } catch (e) {
-    showToast('Error triggering crawl', 'error');
+    showToast('Network error triggering crawl', 'error');
   }
 };
 
@@ -520,3 +720,69 @@ window.restoreCandidate = async function(candId, historyIndex) {
     showToast('Network error during restore', 'error');
   }
 };
+
+
+// ==========================================================================
+// DELETE CRAWL CONFIRMATION LOGIC
+// ==========================================================================
+let pendingDeleteTarget = null;
+
+const deleteDom = {
+  modal: document.getElementById('delete-modal'),
+  closeBtn: document.getElementById('delete-modal-close'),
+  cancelBtn: document.getElementById('btn-cancel-delete'),
+  confirmBtn: document.getElementById('btn-confirm-delete'),
+  siteName: document.getElementById('delete-site-name'),
+  siteFolder: document.getElementById('delete-site-folder')
+};
+
+if (deleteDom.closeBtn) deleteDom.closeBtn.addEventListener('click', closeDeleteModal);
+if (deleteDom.cancelBtn) deleteDom.cancelBtn.addEventListener('click', closeDeleteModal);
+if (deleteDom.modal) {
+  deleteDom.modal.addEventListener('click', (e) => {
+    if (e.target === deleteDom.modal) closeDeleteModal();
+  });
+}
+
+if (deleteDom.confirmBtn) {
+  deleteDom.confirmBtn.addEventListener('click', async () => {
+    if (!pendingDeleteTarget) return;
+
+    const { industryId, rank, candId } = pendingDeleteTarget;
+    deleteDom.confirmBtn.innerText = 'Deleting...';
+    deleteDom.confirmBtn.disabled = true;
+
+    try {
+      const res = await fetch('/api/crawl/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ industryId, rank, candidateId: candId })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast('Crawled website files deleted successfully', 'success');
+        closeDeleteModal();
+        await fetchState();
+      } else {
+        showToast(data.error || 'Failed to delete crawled files', 'error');
+      }
+    } catch (err) {
+      showToast('Network error deleting crawled files', 'error');
+    } finally {
+      deleteDom.confirmBtn.innerText = 'Yes, Delete Files';
+      deleteDom.confirmBtn.disabled = false;
+    }
+  });
+}
+
+window.openDeleteModal = function(industryId, rank, candId, siteTitle) {
+  pendingDeleteTarget = { industryId, rank, candId };
+  if (deleteDom.siteName) deleteDom.siteName.innerText = siteTitle || 'Website';
+  if (deleteDom.siteFolder) deleteDom.siteFolder.innerText = `${industryId}/website-${rank}`;
+  if (deleteDom.modal) deleteDom.modal.classList.remove('hidden');
+};
+
+function closeDeleteModal() {
+  pendingDeleteTarget = null;
+  if (deleteDom.modal) deleteDom.modal.classList.add('hidden');
+}

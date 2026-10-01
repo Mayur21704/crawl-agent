@@ -48,14 +48,25 @@ export function initDb() {
 
 export function getIndustries() {
   const db = getDb();
+  const outputBase = path.resolve(DATA_DIR, '../output');
+
   return db.industries.map(ind => {
     const candidates = db.candidates
       .filter(c => c.industry_id === ind.id)
-      .map(c => ({
-        ...c,
-        screenshot_path: c.screenshot_path || `/screenshots/${ind.id}_${c.rank}.jpg`,
-        screenshotPath: c.screenshot_path || c.screenshotPath || `/screenshots/${ind.id}_${c.rank}.jpg`
-      }));
+      .map(c => {
+        const localIndexPath = path.join(outputBase, ind.id, `website-${c.rank}`, 'index.html');
+        const isCrawled = fs.existsSync(localIndexPath);
+        const crawledUrl = isCrawled ? `/crawled/${ind.id}/website-${c.rank}/index.html` : null;
+
+        return {
+          ...c,
+          isCrawled,
+          crawledUrl,
+          crawledFolder: `${ind.id}/website-${c.rank}`,
+          screenshot_path: c.screenshot_path || `/screenshots/${ind.id}_${c.rank}.jpg`,
+          screenshotPath: c.screenshot_path || c.screenshotPath || `/screenshots/${ind.id}_${c.rank}.jpg`
+        };
+      });
     const crawls = db.crawls.filter(cr => cr.industry_id === ind.id);
     return { ...ind, candidates, crawls };
   });

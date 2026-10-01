@@ -2,7 +2,7 @@
   {
     "id": "electrician",
     "name": "Electrician",
-    "query": "electrician electrical contractor modern architectural lighting",
+    "query": "licensed master electrician electrical contractor wiring EV charger panel upgrade residential commercial electrical services",
     "status": "pending"
   },
   {
@@ -27,6 +27,288 @@
     "id": "dentist",
     "name": "Dentist",
     "query": "dentist dental clinic aesthetic orthodontics luxury studio",
+    "status": "pending"
+  },
+  {
+    "id": "plumber",
+    "name": "Plumber",
+    "query": "plumber contractor services Licensed master plumbing trenchless sewer repair water heaters modern award",
+    "status": "pending"
+  },
+  {
+    "id": "roofer",
+    "name": "Roofer",
+    "query": "roofer contractor services Lifetime warranty architectural slate standing seam metal roofing modern award",
+    "status": "pending"
+  },
+  {
+    "id": "landscaper",
+    "name": "Landscaper / Lawn Care",
+    "query": "landscaper / lawn care contractor services Transformative outdoor living spaces drought tolerant xeriscapes flagstone modern award",
+    "status": "pending"
+  },
+  {
+    "id": "house-painter",
+    "name": "House Painter",
+    "query": "house painter contractor services Ultra durable micro finish paints historic restoration custom modern award",
+    "status": "pending"
+  },
+  {
+    "id": "pest-control",
+    "name": "Pest Control",
+    "query": "pest control contractor services Botanical barrier protection non toxic wildlife exclusion termite modern award",
+    "status": "pending"
+  },
+  {
+    "id": "cleaning-service",
+    "name": "Cleaning Service",
+    "query": "cleaning service contractor services HEPA filtered detail cleaning post renovation cleanup recurring modern award",
+    "status": "pending"
+  },
+  {
+    "id": "handyman",
+    "name": "Handyman",
+    "query": "handyman contractor services Prompt multi skilled craftsmanship for drywall patches door modern award",
+    "status": "pending"
+  },
+  {
+    "id": "garage-door-repair",
+    "name": "Garage Door Repair",
+    "query": "garage door repair contractor services Same day spring replacements heavy duty smart belt modern award",
+    "status": "pending"
+  },
+  {
+    "id": "fence-installer",
+    "name": "Fence Installer",
+    "query": "fence installer contractor services Horizontal modern cedar fences commercial black aluminum gates modern award",
+    "status": "pending"
+  },
+  {
+    "id": "general-contractor",
+    "name": "General Contractor",
+    "query": "general contractor contractor services High end kitchen transformations master suite extensions architectural modern award",
+    "status": "pending"
+  },
+  {
+    "id": "chiropractor",
+    "name": "Chiropractor",
+    "query": "chiropractor contractor services Evidence based chiropractic adjustments computerized spinal decompression posture modern award",
+    "status": "pending"
+  },
+  {
+    "id": "physical-therapist",
+    "name": "Physical Therapist",
+    "query": "physical therapist contractor services Orthopedic rehabilitation post operative ACL recovery vestibular therapy modern award",
+    "status": "pending"
+  },
+  {
+    "id": "optometrist",
+    "name": "Optometrist",
+    "query": "optometrist contractor services Optomap ultra widefield imaging dry eye specialty clinics modern award",
+    "status": "pending"
+  },
+  {
+    "id": "medical-spa",
+    "name": "Medical Spa / Aesthetics",
+    "query": "medical spa / aesthetics contractor services Botox Juvederm fillers Morpheus8 RF microneedling laser hair modern award",
+    "status": "pending"
+  },
+  {
+    "id": "therapist",
+    "name": "Therapist / Counselor",
+    "query": "therapist / counselor contractor services Licensed clinical social work CBT trauma informed EMDR modern award",
+    "status": "pending"
+  },
+  {
+    "id": "veterinarian",
+    "name": "Veterinarian",
+    "query": "veterinarian contractor services Fear free certified veterinary clinic digital ultrasound soft modern award",
+    "status": "pending"
+  },
+  {
+    "id": "urgent-care",
+    "name": "Urgent Care Clinic",
+    "query": "urgent care clinic contractor services No appointment urgent medical evaluations fracture splinting laceration modern award",
+    "status": "pending"
+  },
+  {
+    "id": "hair-salon",
+    "name": "Hair Salon",
+    "query": "hair salon contractor services Master colorists hand tied sew in extensions Brazilian modern award",
+    "status": "pending"
+  },
+  {
+    "id": "barber-shop",
+    "name": "Barber Shop",
+    "query": "barber shop contractor services Traditional straight razor hot lather shaves custom clipper modern award",
+    "status": "pending"
+  },
+  {
+    "id": "nail-salon",
+    "name": "Nail Salon",
+    "query": "nail salon contractor services Non toxic Russian manicures Apres Gel X tips modern award",
+    "status": "pending"
+  },
+  {
+    "id": "day-spa",
+    "name": "Day Spa / Massage",
+    "query": "day spa / massage contractor services Hot basalt stone massage prenatal comfort therapy eucalyptus modern award",
+    "status": "pending"
+  },
+  {
+    "id": "tattoo-studio",
+    "name": "Tattoo & Piercing Studio",
+    "query": "tattoo & piercing studio contractor services Autoclave sterile studio bespoke tattoo designs titanium body modern award",
+    "status": "pending"
+  },
+  {
+    "id": "auto-repair",
+    "name": "Auto Repair / Mechanic",
+    "query": "auto repair / mechanic contractor services Factory scheduled maintenance brake rotors transmission flushes check modern award",
+    "status": "pending"
+  },
+  {
+    "id": "auto-body",
+    "name": "Auto Body / Collision Repair",
+    "query": "auto body / collision repair contractor services Insurance claim concierge paintless dent repair PDR computerized modern award",
+    "status": "pending"
+  },
+  {
+    "id": "auto-detailing",
+    "name": "Auto Detailing",
+    "query": "auto detailing contractor services 9H hardness graphene coatings interior steam extraction wheel modern award",
+    "status": "pending"
+  },
+  {
+    "id": "tire-shop",
+    "name": "Tire Shop",
+    "query": "tire shop contractor services Road force tire balancing winter all season swaps modern award",
+    "status": "pending"
+  },
+  {
+    "id": "restaurant",
+    "name": "Restaurant",
+    "query": "restaurant contractor services Locally sourced heirloom produce dry aged steaks woodfire modern award",
+    "status": "pending"
+  },
+  {
+    "id": "cafe",
+    "name": "Caf\u00e9 / Coffee Shop",
+    "query": "caf\u00e9 / coffee shop contractor services Direct trade single origin espresso oat milk lattes modern award",
+    "status": "pending"
+  },
+  {
+    "id": "bakery",
+    "name": "Bakery",
+    "query": "bakery contractor services Slow fermented artisan sourdough loaves laminated brioche macaron modern award",
+    "status": "pending"
+  },
+  {
+    "id": "food-truck",
+    "name": "Food Truck",
+    "query": "food truck contractor services Curbside street gourmet live location tracking brewery popups modern award",
+    "status": "pending"
+  },
+  {
+    "id": "catering-service",
+    "name": "Catering Service",
+    "query": "catering service contractor services Corporate luncheons elegant wedding plated dinners grazing tables modern award",
+    "status": "pending"
+  },
+  {
+    "id": "personal-trainer",
+    "name": "Personal Trainer / Gym",
+    "query": "personal trainer / gym contractor services Private gym training pods Olympic lifting coaching body modern award",
+    "status": "pending"
+  },
+  {
+    "id": "yoga-pilates",
+    "name": "Yoga / Pilates Studio",
+    "query": "yoga / pilates studio contractor services Custom Balanced Body reformers infrared heated yoga rooms modern award",
+    "status": "pending"
+  },
+  {
+    "id": "martial-arts",
+    "name": "Martial Arts School",
+    "query": "martial arts school contractor services Black belt instruction self defense mastery structured youth modern award",
+    "status": "pending"
+  },
+  {
+    "id": "dance-studio",
+    "name": "Dance Studio",
+    "query": "dance studio contractor services Sprung maple dance floors beginner to pre professional modern award",
+    "status": "pending"
+  },
+  {
+    "id": "immigration",
+    "name": "Immigration Lawyer",
+    "query": "immigration lawyer contractor services Specialized Canadian US immigration attorneys handling corporate intra modern award",
+    "status": "pending"
+  },
+  {
+    "id": "accountant",
+    "name": "Accountant / Tax Prep",
+    "query": "accountant / tax prep contractor services CPA led tax returns corporate entity structuring QuickBooks modern award",
+    "status": "pending"
+  },
+  {
+    "id": "insurance-agency",
+    "name": "Insurance Agency",
+    "query": "insurance agency contractor services Independent insurance brokerage comparing 30 top underwriters for modern award",
+    "status": "pending"
+  },
+  {
+    "id": "financial-advisor",
+    "name": "Financial Advisor",
+    "query": "financial advisor contractor services Fee only fiduciary guidance diversified ETF asset allocation modern award",
+    "status": "pending"
+  },
+  {
+    "id": "real-estate-agent",
+    "name": "Real Estate Agent",
+    "query": "real estate agent contractor services High end architectural marketing cinematic drone walkthroughs private modern award",
+    "status": "pending"
+  },
+  {
+    "id": "photographer",
+    "name": "Photographer / Videographer",
+    "query": "photographer / videographer contractor services Documentary wedding coverage commercial brand campaigns 4K color modern award",
+    "status": "pending"
+  },
+  {
+    "id": "notary",
+    "name": "Notary / Legal Document Prep",
+    "query": "notary / legal document prep contractor services Loan signing agent LSA for real estate escrows modern award",
+    "status": "pending"
+  },
+  {
+    "id": "pet-groomer",
+    "name": "Pet Groomer",
+    "query": "pet groomer contractor services Stress free low noise hand scissoring blueberry facial modern award",
+    "status": "pending"
+  },
+  {
+    "id": "dog-trainer",
+    "name": "Dog Trainer",
+    "query": "dog trainer contractor services Certified behaviorists teaching impulse control puppy socialization off modern award",
+    "status": "pending"
+  },
+  {
+    "id": "pet-boarding",
+    "name": "Pet Boarding / Daycare",
+    "query": "pet boarding / daycare contractor services Turf play yards orthopedic beds private feline condos modern award",
+    "status": "pending"
+  },
+  {
+    "id": "daycare-preschool",
+    "name": "Daycare / Preschool",
+    "query": "daycare / preschool contractor services Montessori inspired infant to pre K curriculums biometric modern award",
+    "status": "pending"
+  },
+  {
+    "id": "tutoring",
+    "name": "Tutoring / Learning Center",
+    "query": "tutoring / learning center contractor services Personalized math science and reading coaching with diagnostic modern award",
     "status": "pending"
   }
 ]

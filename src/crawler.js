@@ -1,135 +1,109 @@
 import fs from 'fs';
 import path from 'path';
-import { chromium } from 'playwright';
-import { stripSriAndCrossorigin, stripPromoBadges, rewritePathsToRelative, unquoteDiskFilenames } from './localizer.js';
+import { spawn } from 'child_process';
+import { fileURLToPath } from 'url';
 import { updateCrawlStatus } from './db.js';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const PROJECT_ROOT = path.resolve(__dirname, '..');
+
 /**
- * Deep Network Intercepting Crawler
- * Launches headless Chromium, listens to all network responses,
- * downloads HTML, CSS, JS runtime chunks, fonts, responsive images, and videos.
+ * Autonomous Deep Website Crawler
+ * Powered by modular Python pipeline suite in pipelines/
+ * Discovers all internal pages, sitemaps, localized CSS/JS, dynamic chunks,
+ * full responsive srcset images, fonts, self-hosted media, strips badges,
+ * and audits all assets for 100% offline self-contained fidelity.
  */
-export async function crawlWebsite({ url, outputDir, crawlId }) {
-  console.log(`\n[CRAWLER] Starting deep crawl for: ${url}`);
+export async function crawlWebsite({ url, outputDir, crawlId, onProgress = () => {} }) {
+  console.log(`\n[CRAWLER] Starting deep Python pipeline crawl for: ${url}`);
   console.log(`[CRAWLER] Target output directory: ${outputDir}`);
 
-  // Create folder structure
-  for (const sub of ['css', 'js', 'images', 'fonts', 'videos']) {
-    fs.mkdirSync(path.join(outputDir, sub), { recursive: true });
-  }
+  onProgress({ percent: 5, stage: 'Discovering pages and sitemaps...', assetCount: 0 });
 
-  const browser = await chromium.launch({
-    headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox']
-  });
-
-  const context = await browser.newContext({
-    viewport: { width: 1440, height: 900 },
-    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-  });
-
-  const page = await context.newPage();
-  let assetCount = 0;
-  const savedUrls = new Set();
-
-  // Intercept all network responses to capture dynamic chunks, webp, avif, woff2, etc.
-  page.on('response', async (response) => {
-    const resUrl = response.url();
-    const status = response.status();
-    if (status !== 200 || savedUrls.has(resUrl) || resUrl.startsWith('data:')) return;
-
-    try {
-      const parsed = new URL(resUrl);
-      const pathname = parsed.pathname;
-      const filename = path.basename(pathname);
-      if (!filename || filename === '/' || filename.includes('google-analytics') || filename.includes('googletagmanager')) return;
-
-      const ext = path.extname(filename).toLowerCase();
-      let targetFolder = null;
-
-      if (['.css'].includes(ext)) targetFolder = 'css';
-      else if (['.js', '.mjs'].includes(ext) || filename.includes('achunk') || filename.includes('chunk')) targetFolder = 'js';
-      else if (['.woff', '.woff2', '.ttf', '.eot', '.otf'].includes(ext)) targetFolder = 'fonts';
-      else if (['.png', '.jpg', '.jpeg', '.webp', '.avif', '.svg', '.gif', '.ico'].includes(ext)) targetFolder = 'images';
-      else if (['.mp4', '.webm', '.ogg'].includes(ext)) targetFolder = 'videos';
-
-      if (targetFolder) {
-        savedUrls.add(resUrl);
-        const buffer = await response.body();
-        const savePath = path.join(outputDir, targetFolder, filename);
-        fs.writeFileSync(savePath, buffer);
-        assetCount++;
-
-        // If filename is encoded (%20), also save unquoted copy immediately
-        const decoded = decodeURIComponent(filename);
-        if (decoded !== filename) {
-          fs.writeFileSync(path.join(outputDir, targetFolder, decoded), buffer);
-        }
-      }
-    } catch (e) {
-      // Ignore background streaming/abort errors
-    }
-  });
-
-  try {
-    // Navigate with generous timeout
-    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
-
-    // Smooth scroll down to bottom to trigger lazy-loaded images, Webflow IX2 animations, and autovideo
-    await page.evaluate(async () => {
-      await new Promise((resolve) => {
-        let totalHeight = 0;
-        const distance = 400;
-        const timer = setInterval(() => {
-          const scrollHeight = document.body.scrollHeight;
-          window.scrollBy(0, distance);
-          totalHeight += distance;
-
-          if (totalHeight >= scrollHeight) {
-            clearInterval(timer);
-            window.scrollTo(0, 0); // Scroll back to top
-            resolve();
-          }
-        }, 150);
-      });
+  return new Promise((resolve, reject) => {
+    const pythonScript = path.join(PROJECT_ROOT, 'pipelines', 'master_crawler.py');
+    const child = spawn('python', [pythonScript, url, outputDir, '--max-pages', '35'], {
+      cwd: PROJECT_ROOT,
+      env: process.env
     });
 
-    // Wait a short moment for final network idle
-    await page.waitForTimeout(3000);
+    let lastAssets = 0;
+    let stdoutBuffer = '';
 
-    // Capture fully hydrated HTML
-    let rawHtml = await page.content();
+    child.stdout.on('data', (chunk) => {
+      const text = chunk.toString();
+      stdoutBuffer += text;
+      const lines = stdoutBuffer.split('\n');
+      stdoutBuffer = lines.pop(); // keep trailing remainder
 
-    // 1. Strip SRI integrity and crossorigin attributes (fixes CSS blocking)
-    rawHtml = stripSriAndCrossorigin(rawHtml);
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (trimmed.startsWith('[PROGRESS]')) {
+          try {
+            const jsonStr = trimmed.replace('[PROGRESS]', '').trim();
+            const prog = JSON.parse(jsonStr);
+            lastAssets = prog.assets || lastAssets;
+            onProgress({
+              percent: prog.percent,
+              stage: prog.stage,
+              assetCount: lastAssets,
+              pages: prog.pages || 0,
+              completed: prog.percent >= 100,
+              outputDir
+            });
+          } catch (e) {
+            // Ignore parse errors on partial stream
+          }
+        } else if (trimmed) {
+          console.log(`[PY-CRAWLER] ${trimmed}`);
+        }
+      }
+    });
 
-    // 2. Strip Webflow promo badges
-    rawHtml = stripPromoBadges(rawHtml);
+    child.stderr.on('data', (chunk) => {
+      const errText = chunk.toString().trim();
+      if (errText) {
+        console.error(`[PY-CRAWLER ERR] ${errText}`);
+      }
+    });
 
-    // 3. Rewrite all paths to relative ./
-    rawHtml = rewritePathsToRelative(rawHtml);
+    child.on('close', (code) => {
+      if (code === 0) {
+        console.log(`[CRAWLER] Deep crawl complete for ${url}! Total assets: ${lastAssets}`);
+        if (crawlId) {
+          updateCrawlStatus(crawlId, 'completed', lastAssets);
+        }
+        onProgress({
+          percent: 100,
+          stage: `✓ Crawl Completed! ${lastAssets} assets localized offline.`,
+          assetCount: lastAssets,
+          completed: true,
+          outputDir
+        });
+        resolve({ success: true, assetCount: lastAssets, outputDir });
+      } else {
+        const errMsg = `Python crawler exited with code ${code}`;
+        console.error(`[CRAWLER] ${errMsg}`);
+        if (crawlId) {
+          updateCrawlStatus(crawlId, 'failed', lastAssets, errMsg);
+        }
+        onProgress({
+          percent: 100,
+          stage: `✗ Crawl Error: ${errMsg}`,
+          error: errMsg,
+          completed: true
+        });
+        resolve({ success: false, error: errMsg });
+      }
+    });
 
-    // Save final clean index.html
-    const indexPath = path.join(outputDir, 'index.html');
-    fs.writeFileSync(indexPath, rawHtml, 'utf-8');
-    console.log(`[CRAWLER] Saved clean index.html (${rawHtml.length} chars)`);
-
-    // Ensure all unquoted filenames exist on disk
-    unquoteDiskFilenames(outputDir);
-
-    await browser.close();
-
-    console.log(`[CRAWLER] Deep crawl complete for ${url}! Total assets saved: ${assetCount}`);
-    if (crawlId) {
-      updateCrawlStatus(crawlId, 'completed', assetCount);
-    }
-    return { success: true, assetCount, outputDir };
-  } catch (err) {
-    console.error(`[CRAWLER] Crawl failed for ${url}:`, err.message);
-    await browser.close();
-    if (crawlId) {
-      updateCrawlStatus(crawlId, 'failed', assetCount, err.message);
-    }
-    return { success: false, error: err.message };
-  }
+    child.on('error', (err) => {
+      console.error(`[CRAWLER] Failed to spawn Python crawler process:`, err);
+      if (crawlId) {
+        updateCrawlStatus(crawlId, 'failed', 0, err.message);
+      }
+      reject(err);
+    });
+  });
 }

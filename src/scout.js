@@ -12,10 +12,18 @@ const SCREENSHOTS_DIR = path.resolve(__dirname, '../public/screenshots');
 
 // Curated pool of verified, live, high-aesthetic award-grade candidates per industry
 export const VERIFIED_CANDIDATE_POOL = {
+  'tattoo-studio': [
+    { url: 'https://wonderkin.michael-aust.com/', title: 'Wonderkin Tattoo Studio' },
+    { url: 'https://hype-tattoo.com/', title: 'Hype Tattoo Studio' }
+  ],
+  therapist: [
+    { url: 'https://maximatherapy.com/', title: 'Maxima Therapy' },
+    { url: 'https://twofoldny.com/', title: 'Twofold Therapy' }
+  ],
   electrician: [
-    { url: 'https://spark-electric.webflow.io', title: 'Spark Electric Architectural Lighting' },
-    { url: 'https://volt-template.webflow.io', title: 'Volt High-End Master Electrical' },
-    { url: 'https://showcased.webflow.io', title: 'Showcased Modern Architecture & Engineering' }
+    { url: 'https://spark-electric.webflow.io', title: 'Spark Electric Architectural Lighting & Commercial Contractor' },
+    { url: 'https://volt-template.webflow.io', title: 'Volt Master Electrician & Commercial Electrical Services' },
+    { url: 'https://element-electrical.webflow.io', title: 'Element Master Electrical Contractor Services' }
   ],
   hvac: [
     { url: 'https://rls-appliances-repair-hvac.webflow.io', title: 'RLS Precision Climate Engineering & HVAC' },
