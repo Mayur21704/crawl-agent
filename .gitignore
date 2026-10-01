@@ -2,13 +2,9 @@ node_modules/
 .env
 data/agent.db
 data/agent.db-journal
-public/screenshots/*.jpg
-!public/screenshots/placeholder.svg
 output/
 .DS_Store
 Thumbs.db
-
-public/screenshots/*.png
-
 __pycache__/
 *.pyc
+public/screenshots/zoro_verified.png
