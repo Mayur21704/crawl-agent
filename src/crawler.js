@@ -1,12 +1,34 @@
 import fs from 'fs';
 import path from 'path';
-import { spawn } from 'child_process';
+import { spawn, execSync } from 'child_process';
 import { fileURLToPath } from 'url';
 import { updateCrawlStatus } from './db.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const PROJECT_ROOT = path.resolve(__dirname, '..');
+
+/**
+ * Automatically resolve Python executable across OS environments:
+ * Linux/Ubuntu VPS: python3
+ * Windows: python / py
+ */
+function getPythonCommand() {
+  const candidates = process.platform === 'win32'
+    ? ['python', 'py', 'python3']
+    : ['python3', 'python'];
+
+  for (const cmd of candidates) {
+    try {
+      execSync(`${cmd} --version`, { stdio: 'ignore' });
+      return cmd;
+    } catch (e) {
+      // Try next candidate
+    }
+  }
+  return process.platform === 'win32' ? 'python' : 'python3';
+}
+
 
 /**
  * Autonomous Deep Website Crawler
@@ -23,7 +45,9 @@ export async function crawlWebsite({ url, outputDir, crawlId, onProgress = () =>
 
   return new Promise((resolve, reject) => {
     const pythonScript = path.join(PROJECT_ROOT, 'pipelines', 'master_crawler.py');
-    const child = spawn('python', [pythonScript, url, outputDir, '--max-pages', '35'], {
+    const pyCmd = getPythonCommand();
+    console.log(`[CRAWLER] Using Python binary: ${pyCmd}`);
+    const child = spawn(pyCmd, [pythonScript, url, outputDir, '--max-pages', '35'], {
       cwd: PROJECT_ROOT,
       env: process.env
     });
