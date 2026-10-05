@@ -237,3 +237,14 @@ export function restoreCandidateFromHistory(candidateId, historyIndex) {
   saveDb(db);
   return true;
 }
+
+export function toggleCandidateSkipCrawl(candidateId, skipCrawl) {
+  const db = getDb();
+  const c = db.candidates.find(item => item.id == candidateId);
+  if (c) {
+    c.skipCrawl = Boolean(skipCrawl);
+    saveDb(db);
+    return true;
+  }
+  return false;
+}

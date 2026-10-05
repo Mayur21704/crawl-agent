@@ -109,6 +109,55 @@ const INDUSTRY_CONFIG = {
   }
 
 
+  
+// Toggle Skip Re-crawl (Lock)
+window.toggleSkipCrawl = async function(candId, skipCrawl) {
+  try {
+    const res = await fetch('/api/candidate/skip-crawl', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ candidateId: candId, skipCrawl })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast(skipCrawl ? '🔒 Website locked: Will be skipped during batch crawl' : '🔓 Website unlocked: Will be included in re-crawls', 'info');
+      // Update local state
+      state.industries.forEach(ind => {
+        const c = ind.candidates.find(item => item.id == candId);
+        if (c) c.skipCrawl = skipCrawl;
+      });
+      renderIndustries();
+    } else {
+      showToast(data.error || 'Failed to update lock status', 'error');
+    }
+  } catch (e) {
+    showToast('Failed to update lock status', 'error');
+  }
+};
+
+// Export and Download output.tar.gz
+window.exportTarArchive = async function() {
+  const btn = document.getElementById('btn-export-tar');
+  if (btn) btn.classList.add('loading');
+  showToast('Creating output.tar.gz from output/ folder...', 'info');
+
+  try {
+    const res = await fetch('/api/crawl/archive', { method: 'POST' });
+    const data = await res.json();
+    if (data.success) {
+      showToast(`✅ Created output.tar.gz (${data.sizeMB} MB)! Downloading...`, 'success');
+      // Trigger download in browser
+      window.location.href = '/api/crawl/archive/download';
+    } else {
+      showToast(data.error || 'Failed to create archive', 'error');
+    }
+  } catch (e) {
+    showToast('Failed to trigger archive export', 'error');
+  } finally {
+    if (btn) btn.classList.remove('loading');
+  }
+};
+
   // Initialize Application
 async function init() {
   bindEvents();
@@ -407,6 +456,18 @@ function renderCandidateCard(industryId, cand) {
           ` : ''}
         </div>
 
+        <!-- Lock / Skip Re-crawl Checkbox -->
+        <div class="lock-crawl-row ${cand.skipCrawl ? 'is-locked' : ''}">
+          <label class="lock-crawl-toggle" title="Check this so batch 'Start Deep Crawl' will skip this website and keep existing crawled files">
+            <input type="checkbox" id="skip-${cand.id}" ${cand.skipCrawl ? 'checked' : ''} onchange="toggleSkipCrawl('${cand.id}', this.checked)">
+            <span class="lock-toggle-box"></span>
+            <span class="lock-toggle-label">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              <span>${cand.skipCrawl ? 'Locked: Will Skip on Batch Re-crawl' : 'Lock Crawl (Skip on Batch)'}</span>
+            </span>
+          </label>
+        </div>
+
         <!-- Bottom Controls -->
         <div class="card-bottom-bar">
           <div class="switch-wrapper ${isApproved ? 'active' : ''}" onclick="toggleApproval('${cand.id}', ${isApproved ? 0 : 1})">
@@ -418,15 +479,18 @@ function renderCandidateCard(industryId, cand) {
 
           <div class="card-actions-right">
             ${cand.isCrawled ? `
-            <button class="btn-recrawl" onclick="crawlSingleSite('${industryId}', ${cand.rank}, '${cand.id}')" title="Re-crawl this website">
-              <span>Re-crawl ⚡</span>
+            <button class="btn-recrawl" onclick="crawlSingleSite('${industryId}', ${cand.rank}, '${cand.id}')" title="Re-crawl this individual website now">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+              <span>Re-crawl Site</span>
             </button>
             <button class="btn-delete-action" onclick="openDeleteModal('${industryId}', ${cand.rank}, '${cand.id}', '${escapeQuotes(cand.title)}')" title="Delete crawled static files">
-              <span>🗑️ Delete</span>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              <span>Delete</span>
             </button>
             ` : `
-            <button class="btn-crawl-primary" onclick="crawlSingleSite('${industryId}', ${cand.rank}, '${cand.id}')" title="Crawl this website">
-              <span>Crawl Site ⚡</span>
+            <button class="btn-crawl-primary" onclick="crawlSingleSite('${industryId}', ${cand.rank}, '${cand.id}')" title="Crawl this individual website now">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+              <span>Crawl This Site</span>
             </button>
             `}
           </div>

@@ -1,3 +1,4 @@
+import { spawn } from 'child_process';
 import fs from 'fs';
 import express from 'express';
 import cors from 'cors';
@@ -5,7 +6,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import { chromium } from 'playwright';
-import { initDb, getIndustries, updateCandidateUrl, toggleCandidateApproval, createCrawlJob, restoreCandidateFromHistory } from './db.js';
+import { initDb, getIndustries, updateCandidateUrl, toggleCandidateApproval, toggleCandidateSkipCrawl, createCrawlJob, restoreCandidateFromHistory } from './db.js';
 import { runScout, validateAndInspectWebsite, rescanCandidate } from './scout.js';
 import { crawlWebsite } from './crawler.js';
 
@@ -15,9 +16,50 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const PUBLIC_DIR = path.resolve(__dirname, '../public');
 const OUTPUT_DIR = path.resolve(__dirname, '../output');
+const PROJECT_ROOT = path.resolve(__dirname, '..');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+/**
+ * Executes pipelines/archive_output.py to package output/ -> /home/ubuntu/output.tar.gz
+ * Deletes any previous archive before creating the new one.
+ */
+function runOutputArchive() {
+  return new Promise((resolve) => {
+    const pythonCmd = process.platform === 'win32' ? 'python' : 'python3';
+    const scriptPath = path.join(PROJECT_ROOT, 'pipelines', 'archive_output.py');
+    console.log(`[ARCHIVE] Triggering archive_output.py via ${pythonCmd}...`);
+
+    const child = spawn(pythonCmd, [scriptPath], { cwd: PROJECT_ROOT, env: process.env });
+    let stdout = '';
+    let stderr = '';
+
+    child.stdout.on('data', d => { stdout += d.toString(); });
+    child.stderr.on('data', d => { stderr += d.toString(); });
+
+    child.on('close', code => {
+      console.log(stdout.trim());
+      if (code === 0) {
+        const targetPath = fs.existsSync('/home/ubuntu') ? '/home/ubuntu/output.tar.gz' : path.join(PROJECT_ROOT, 'output.tar.gz');
+        let sizeMB = '0';
+        try {
+          sizeMB = (fs.statSync(targetPath).size / (1024 * 1024)).toFixed(2);
+        } catch (e) {}
+        resolve({ success: true, path: targetPath, sizeMB });
+      } else {
+        console.error(`[ARCHIVE] Failed with code ${code}: ${stderr}`);
+        resolve({ success: false, error: stderr || `Exit code ${code}` });
+      }
+    });
+
+    child.on('error', err => {
+      console.error(`[ARCHIVE] Process error:`, err);
+      resolve({ success: false, error: err.message });
+    });
+  });
+}
+
 
 app.use(cors());
 app.use(express.json());
@@ -163,6 +205,8 @@ app.post('/api/crawl/single', async (req, res) => {
           }
         }
       });
+      console.log(`[SERVER] Single crawl complete for ${url}. Updating output.tar.gz...`);
+      await runOutputArchive();
     } catch (err) {
       console.error('[SERVER] Single crawl error:', err);
       if (candidateId) {
@@ -196,6 +240,11 @@ app.post('/api/crawl/start', async (req, res) => {
   for (const ind of industries) {
     const approved = ind.candidates.filter(c => c.approved === 1);
     for (const cand of approved) {
+      // Check if user locked / checked 'skip re-crawl'
+      if (cand.skipCrawl) {
+        console.log(`[SERVER] Skipping ${cand.id} (${cand.url}) - marked as skipCrawl/locked`);
+        continue;
+      }
       jobsToRun.push({
         industryId: ind.id,
         rank: cand.rank,
@@ -203,6 +252,10 @@ app.post('/api/crawl/start', async (req, res) => {
         outputDir: path.join(OUTPUT_DIR, ind.id, `website-${cand.rank}`)
       });
     }
+  }
+
+  if (jobsToRun.length === 0) {
+    return res.json({ success: false, message: 'No approved websites to crawl (all approved sites are marked with Skip Re-crawl).' });
   }
 
   if (jobsToRun.length === 0) {
@@ -224,6 +277,8 @@ app.post('/api/crawl/start', async (req, res) => {
         await crawlWebsite({ url: job.url, outputDir: job.outputDir, crawlId });
       }
       currentCrawlProgress.status = 'finished';
+      console.log('[SERVER] All crawls finished! Creating output.tar.gz...');
+      await runOutputArchive();
     } catch (err) {
       console.error('[SERVER] Crawl batch error:', err);
       currentCrawlProgress.status = 'error';
@@ -287,6 +342,36 @@ app.post('/api/crawl/delete', (req, res) => {
     console.error('[SERVER] Delete crawl error:', err.message);
     res.status(500).json({ success: false, error: err.message });
   }
+});
+
+
+// API: Toggle Skip Re-crawl (Lock) for candidate
+app.post('/api/candidate/skip-crawl', (req, res) => {
+  const { candidateId, skipCrawl } = req.body;
+  if (!candidateId) {
+    return res.status(400).json({ success: false, error: 'candidateId is required' });
+  }
+  const ok = toggleCandidateSkipCrawl(candidateId, skipCrawl);
+  res.json({ success: ok, skipCrawl: Boolean(skipCrawl) });
+});
+
+// API: Manually trigger output.tar.gz packaging
+app.post('/api/crawl/archive', async (req, res) => {
+  try {
+    const result = await runOutputArchive();
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// API: Download output.tar.gz
+app.get('/api/crawl/archive/download', (req, res) => {
+  const targetPath = fs.existsSync('/home/ubuntu') ? '/home/ubuntu/output.tar.gz' : path.join(PROJECT_ROOT, 'output.tar.gz');
+  if (fs.existsSync(targetPath)) {
+    return res.download(targetPath, 'output.tar.gz');
+  }
+  res.status(404).send('output.tar.gz not found. Please run a crawl first.');
 });
 
 app.listen(PORT, () => {

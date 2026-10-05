@@ -376,7 +376,8 @@
       "score": 8,
       "notes": "Evaluated via heuristic fallback: Electrician Services For Businesses & Facilities in NH | Spark Electric",
       "approved": 0,
-      "status": "scouted"
+      "status": "scouted",
+      "skipCrawl": true
     },
     {
       "id": 1790853659917,
