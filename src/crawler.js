@@ -1,3 +1,4 @@
+import { crawlWebsiteWithBrowser } from './browser_crawler.js';
 import fs from 'fs';
 import path from 'path';
 import { spawn, execSync } from 'child_process';
@@ -38,6 +39,26 @@ function getPythonCommand() {
  * and audits all assets for 100% offline self-contained fidelity.
  */
 export async function crawlWebsite({ url, outputDir, crawlId, aggressive = false, onProgress = () => {} }) {
+  // 1. High-Fidelity Aggressive Mode: Use Autonomous Chromium Browser Engine
+  if (aggressive) {
+    console.log(`\n[CRAWLER] 🔥 AGGRESSIVE MODE: Launching Autonomous Chromium Deep Engine for: ${url}`);
+    try {
+      const result = await crawlWebsiteWithBrowser({
+        url,
+        outputDir,
+        maxPages: 35,
+        onProgress
+      });
+      if (crawlId) {
+        updateCrawlStatus(crawlId, result.success ? 'completed' : 'failed', result.assetCount);
+      }
+      return result;
+    } catch (browserErr) {
+      console.warn(`[CRAWLER] Chromium engine exception (${browserErr.message}). Falling back to Aggressive Python Pipeline...`);
+    }
+  }
+
+  // 2. High-Speed Modular Python Pipeline
   console.log(`\n[CRAWLER] Starting deep Python pipeline crawl for: ${url}`);
   console.log(`[CRAWLER] Target output directory: ${outputDir}`);
 
