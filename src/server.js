@@ -6,7 +6,8 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import { chromium } from 'playwright';
-import { initDb, getIndustries, updateCandidateUrl, toggleCandidateApproval, toggleCandidateSkipCrawl, createCrawlJob, restoreCandidateFromHistory } from './db.js';
+import { initDb, getIndustries, updateCandidateUrl, toggleCandidateApproval, toggleCandidateSkipCrawl,
+  addCustomCandidate, createCrawlJob, restoreCandidateFromHistory } from './db.js';
 import { runScout, validateAndInspectWebsite, rescanCandidate } from './scout.js';
 import { crawlWebsite } from './crawler.js';
 
@@ -168,7 +169,7 @@ app.post('/api/scout/start', async (req, res) => {
 
 // API: Crawl Single Candidate with Live Progress Tracking
 app.post('/api/crawl/single', async (req, res) => {
-  const { candidateId, industryId, rank, url } = req.body;
+  const { candidateId, industryId, rank, url, aggressive } = req.body;
   if (!industryId || !rank || !url) {
     return res.status(400).json({ success: false, error: 'industryId, rank, and url are required' });
   }
@@ -372,6 +373,95 @@ app.get('/api/crawl/archive/download', (req, res) => {
     return res.download(targetPath, 'output.tar.gz');
   }
   res.status(404).send('output.tar.gz not found. Please run a crawl first.');
+});
+
+
+// API: Add manual custom candidate website to industry
+app.post('/api/candidate/add', async (req, res) => {
+  const { industryId, url, title, notes, rank } = req.body;
+  if (!industryId || !url) {
+    return res.status(400).json({ success: false, error: 'industryId and url are required' });
+  }
+
+  let normalizedUrl = url.trim();
+  if (!/^https?:\/\//i.test(normalizedUrl)) {
+    normalizedUrl = 'https://' + normalizedUrl;
+  }
+
+  try {
+    new URL(normalizedUrl);
+  } catch (e) {
+    return res.status(400).json({ success: false, error: 'Invalid website URL format' });
+  }
+
+  console.log(`[SERVER] Adding custom candidate to ${industryId}: ${normalizedUrl}`);
+
+  const targetRank = parseInt(rank, 10) || 
+    ((getIndustries().find(i => i.id === industryId)?.candidates?.length || 0) + 1);
+
+  const screenshotFilename = `${industryId}_${targetRank}_${Date.now()}.jpg`;
+  const screenshotsDir = path.join(PROJECT_ROOT, 'public', 'screenshots');
+  if (!fs.existsSync(screenshotsDir)) {
+    fs.mkdirSync(screenshotsDir, { recursive: true });
+  }
+  const screenshotDiskPath = path.join(screenshotsDir, screenshotFilename);
+  let finalTitle = title ? title.trim() : '';
+
+  try {
+    const browser = await chromium.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
+    const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+    await page.goto(normalizedUrl, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    if (!finalTitle) {
+      finalTitle = (await page.title()) || '';
+    }
+    await page.waitForTimeout(1000);
+    await page.screenshot({ path: screenshotDiskPath, quality: 75, type: 'jpeg' });
+    await browser.close();
+  } catch (err) {
+    console.log(`[SERVER] Headless screenshot capture notice for ${normalizedUrl}: ${err.message}`);
+  }
+
+  const screenshotWebPath = fs.existsSync(screenshotDiskPath) 
+    ? `/screenshots/${screenshotFilename}` 
+    : `/screenshots/placeholder.svg`;
+
+  const cand = addCustomCandidate({
+    industryId,
+    url: normalizedUrl,
+    title: finalTitle,
+    notes,
+    rank: targetRank,
+    screenshotPath: screenshotWebPath
+  });
+
+  res.json({ success: true, candidate: cand, message: `Successfully added ${cand.title || normalizedUrl} to ${industryId}` });
+});
+
+// API: Quick Inspect URL for Add Modal
+app.post('/api/candidate/inspect-url', async (req, res) => {
+  const { url } = req.body;
+  if (!url) return res.status(400).json({ success: false, error: 'url required' });
+
+  let norm = url.trim();
+  if (!/^https?:\/\//i.test(norm)) norm = 'https://' + norm;
+
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 6000);
+    const resp = await fetch(norm, {
+      signal: controller.signal,
+      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' }
+    });
+    clearTimeout(timeoutId);
+
+    const html = await resp.text();
+    const match = html.match(/<title[^>]*>([^<]+)<\/title>/i);
+    const title = match ? match[1].trim() : '';
+
+    res.json({ success: true, url: norm, title, status: resp.status });
+  } catch (err) {
+    res.json({ success: false, error: err.message });
+  }
 });
 
 app.listen(PORT, () => {

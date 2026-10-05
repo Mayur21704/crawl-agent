@@ -37,7 +37,7 @@ function getPythonCommand() {
  * full responsive srcset images, fonts, self-hosted media, strips badges,
  * and audits all assets for 100% offline self-contained fidelity.
  */
-export async function crawlWebsite({ url, outputDir, crawlId, onProgress = () => {} }) {
+export async function crawlWebsite({ url, outputDir, crawlId, aggressive = false, onProgress = () => {} }) {
   console.log(`\n[CRAWLER] Starting deep Python pipeline crawl for: ${url}`);
   console.log(`[CRAWLER] Target output directory: ${outputDir}`);
 
@@ -47,7 +47,12 @@ export async function crawlWebsite({ url, outputDir, crawlId, onProgress = () =>
     const pythonScript = path.join(PROJECT_ROOT, 'pipelines', 'master_crawler.py');
     const pyCmd = getPythonCommand();
     console.log(`[CRAWLER] Using Python binary: ${pyCmd}`);
-    const child = spawn(pyCmd, ['-m', 'pipelines.master_crawler', url, outputDir, '--max-pages', '35'], {
+    const pyArgs = ['-m', 'pipelines.master_crawler', url, outputDir, '--max-pages', aggressive ? '45' : '35'];
+    if (aggressive) {
+      pyArgs.push('--aggressive');
+      console.log(`[CRAWLER] 🔥 AGGRESSIVE MODE ENABLED: Deep asset healing, clean slate wipe, and lazyload normalization active.`);
+    }
+    const child = spawn(pyCmd, pyArgs, {
       cwd: PROJECT_ROOT,
       env: process.env
     });

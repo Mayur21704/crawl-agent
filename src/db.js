@@ -248,3 +248,60 @@ export function toggleCandidateSkipCrawl(candidateId, skipCrawl) {
   }
   return false;
 }
+
+
+export function addCustomCandidate({ industryId, url, title, notes, rank, screenshotPath }) {
+  const db = getDb();
+  
+  // Verify industry exists, or create if needed
+  let ind = db.industries.find(i => i.id === industryId);
+  if (!ind) {
+    ind = {
+      id: industryId,
+      name: industryId.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
+      status: 'active',
+      search_query: `${industryId} services`,
+      updated_at: new Date().toISOString()
+    };
+    db.industries.push(ind);
+  }
+
+  // Determine rank if not given or find next rank
+  const existingCandidates = db.candidates.filter(c => c.industry_id === industryId);
+  let targetRank = parseInt(rank, 10);
+  if (isNaN(targetRank) || targetRank <= 0) {
+    const maxRank = existingCandidates.reduce((max, c) => Math.max(max, c.rank || 0), 0);
+    targetRank = maxRank + 1;
+  }
+
+  // Fallback domain name for title
+  let finalTitle = title;
+  if (!finalTitle) {
+    try {
+      const u = new URL(url);
+      finalTitle = u.hostname.replace(/^www\./, '');
+    } catch (e) {
+      finalTitle = 'Custom Candidate';
+    }
+  }
+
+  const newCand = {
+    id: Date.now() + Math.floor(Math.random() * 1000),
+    industry_id: industryId,
+    url: url.trim(),
+    rank: targetRank,
+    title: finalTitle,
+    screenshot_path: screenshotPath || `/screenshots/${industryId}_${targetRank}.jpg`,
+    score: 9.0,
+    notes: notes || 'Manually added candidate website for evaluation and offline cloning.',
+    approved: 1,
+    status: 'manual-added',
+    skipCrawl: false,
+    history: []
+  };
+
+  db.candidates.push(newCand);
+  saveDb(db);
+  console.log(`[DB] Added custom candidate #${targetRank} for ${industryId}: ${url}`);
+  return newCand;
+}

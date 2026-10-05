@@ -35,4 +35,4 @@ def audit_clone_links(dest_dir):
                             broken_assets.append((html_path, s))
 
     print(f"[AUDIT REPORT] Found {len(broken_links)} broken page links and {len(broken_assets)} broken local asset paths.")
-    return {'broken_links': broken_links, 'broken_assets': broken_assets}\n
+    return {'broken_links': broken_links, 'broken_assets': broken_assets}

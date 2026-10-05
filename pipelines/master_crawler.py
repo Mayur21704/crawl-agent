@@ -79,6 +79,14 @@ try:
     from .verify_clone import verify_clone_health
 except (ImportError, ValueError):
     from verify_clone import verify_clone_health
+try:
+    from .lazyload_normalizer import normalize_all_pages
+except (ImportError, ValueError):
+    from lazyload_normalizer import normalize_all_pages
+try:
+    from .webflow_cleaner import clean_webflow_directory
+except (ImportError, ValueError):
+    from webflow_cleaner import clean_webflow_directory
 
 def emit_progress(percent, stage, pages=0, assets=0):
     progress_info = {
@@ -91,9 +99,17 @@ def emit_progress(percent, stage, pages=0, assets=0):
     # Print machine-readable JSON line prefixed with [PROGRESS]
     print(f"[PROGRESS] {json.dumps(progress_info)}", flush=True)
 
-def deep_crawl_website(base_url, output_dir, max_pages=35):
+def deep_crawl_website(base_url, output_dir, max_pages=35, aggressive=False):
     print(f"=== [MASTER CRAWLER] Starting deep clone for {base_url} ===")
     print(f"=== Target Output: {output_dir} ===")
+    if aggressive:
+        print("[AGGRESSIVE CRAWLER] Purging previous output for clean slate high-fidelity clone...")
+        import shutil
+        if os.path.exists(output_dir):
+            try:
+                shutil.rmtree(output_dir, ignore_errors=True)
+            except Exception as e:
+                print(f"[AGGRESSIVE CRAWLER] Warning on wipe: {e}")
     os.makedirs(output_dir, exist_ok=True)
     os.makedirs(os.path.join(output_dir, 'css'), exist_ok=True)
     os.makedirs(os.path.join(output_dir, 'js'), exist_ok=True)
@@ -175,8 +191,18 @@ def deep_crawl_website(base_url, output_dir, max_pages=35):
 
     emit_progress(90, "Auditing assets and healing any missing files...", page_count, total_assets_count)
 
+    # 6.5 Normalize Lazyload & Webflow interactions
+    try:
+        normalize_all_pages(output_dir)
+        clean_webflow_directory(output_dir)
+    except Exception as e:
+        print(f"[POSTPROCESS] Normalization notice: {e}")
+
     # 7. Audit & Auto-Heal
-    healed = audit_and_heal_assets(base_url, output_dir)
+    healed = audit_and_heal_assets(base_url, output_dir, retries=5 if aggressive else 3, timeout=35 if aggressive else 20)
+    if aggressive:
+        # Second pass in aggressive mode to resolve nested dependencies in newly downloaded CSS
+        healed += audit_and_heal_assets(base_url, output_dir, retries=5, timeout=35)
     total_assets_count += healed
 
     emit_progress(98, "Running final offline verification...", page_count, total_assets_count)
@@ -194,9 +220,10 @@ def main():
     parser.add_argument("url", help="Target website URL to clone")
     parser.add_argument("output", help="Destination folder for offline package")
     parser.add_argument("--max-pages", type=int, default=35, help="Maximum internal pages to crawl (default: 35)")
+    parser.add_argument("--aggressive", action="store_true", help="Aggressive high-fidelity crawl: deep auto-heal, lazyload normalization, clean slate")
     args = parser.parse_args()
 
-    deep_crawl_website(args.url, args.output, max_pages=args.max_pages)
+    deep_crawl_website(args.url, args.output, max_pages=args.max_pages, aggressive=args.aggressive)
 
 if __name__ == '__main__':
     main()

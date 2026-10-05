@@ -25,4 +25,4 @@ def duplicate_assets_for_fallback(dest_dir):
                 except Exception:
                     pass
     print(f"[SUBPATH ENGINE] Created {aliased} root fallback aliases for nested assets.")
-    return aliased\n
+    return aliased

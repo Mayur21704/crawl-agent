@@ -35,4 +35,4 @@ def generate_seo_manifest(dest_dir):
     with open(out_file, 'w', encoding='utf-8') as f:
         json.dump(manifest, f, indent=2)
     print(f"[SEO EXTRACTOR] Saved SEO metadata manifest to {out_file}")
-    return manifest\n
+    return manifest

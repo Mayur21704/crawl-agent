@@ -51,4 +51,4 @@ def normalize_all_pages(dest_dir):
                         fl.write(new_content)
                     modified += 1
     print(f"[LAZYLOAD NORMALIZER] Normalized lazyload attributes in {modified} HTML files.")
-    return modified\n
+    return modified

@@ -210,6 +210,93 @@
     </div>
   </div>
 
+  
+  <!-- Add Website Modal -->
+  <div id="add-website-modal" class="modal-backdrop hidden">
+    <div class="modal-glass-container modal-md">
+      <div class="modal-header">
+        <div class="modal-header-info">
+          <span class="modal-badge text-primary" id="add-modal-badge">MANUAL CANDIDATE ENTRY</span>
+          <h3 class="modal-title" id="add-modal-title">Add Website to Industry</h3>
+        </div>
+        <button id="add-modal-close" class="modal-close-btn" onclick="closeAddWebsiteModal()" aria-label="Close modal">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <form id="add-website-form" onsubmit="submitAddWebsite(event)" class="modal-body-form">
+        <input type="hidden" id="add-site-industry-id" value="">
+        
+        <div class="form-group">
+          <label for="add-site-url" class="form-label">Website URL <span class="required">*</span></label>
+          <div class="form-input-with-action">
+            <input 
+              type="url" 
+              id="add-site-url" 
+              class="form-control" 
+              placeholder="https://example.com" 
+              required 
+              autocomplete="off"
+              oninput="handleUrlInputPreview(this.value)"
+            >
+            <button type="button" class="btn-check-url" onclick="checkAddWebsiteUrl()" title="Test website accessibility">
+              <span>Test URL</span>
+            </button>
+          </div>
+          <div id="add-site-url-status" class="form-help-status"></div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="add-site-title" class="form-label">Candidate Title / Business Name</label>
+            <input 
+              type="text" 
+              id="add-site-title" 
+              class="form-control" 
+              placeholder="e.g. Apex Electrical Services" 
+              autocomplete="off"
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="add-site-rank" class="form-label">Slot / Rank Number</label>
+            <input 
+              type="number" 
+              id="add-site-rank" 
+              class="form-control" 
+              min="1" 
+              max="20" 
+              placeholder="Auto (Next slot)"
+            >
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="add-site-notes" class="form-label">Evaluation Notes (Optional)</label>
+          <textarea 
+            id="add-site-notes" 
+            class="form-control form-textarea" 
+            rows="2" 
+            placeholder="e.g. Modern layout with dark mode, high-contrast typography, and smooth page transitions."
+          ></textarea>
+        </div>
+
+        <div class="modal-form-actions">
+          <button type="button" class="btn btn-secondary-light" onclick="closeAddWebsiteModal()">Cancel</button>
+          <button type="submit" id="btn-submit-add-site" class="btn btn-primary">
+            <svg class="btn-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            <span id="btn-submit-add-site-text">Add to Pipeline</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- Toast Notification System -->
   <div id="toast-container" class="toast-container"></div>
 

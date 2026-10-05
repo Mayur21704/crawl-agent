@@ -39,4 +39,4 @@ def scrape_shopify_assets(dest_dir):
             if ok:
                 downloaded += 1
     print(f"[SHOPIFY SCRAPER] Localized {downloaded} Shopify CDN files.")
-    return downloaded\n
+    return downloaded

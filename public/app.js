@@ -326,6 +326,12 @@ function renderIndustries() {
               <p class="industry-meta">Target: 2 verified themes • Pipeline Status: ${statusText}</p>
             </div>
           </div>
+          <div class="industry-header-actions">
+            <button class="btn-add-website" onclick="openAddWebsiteModal('${ind.id}', '${escapeQuotes(ind.name)}')">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              <span>Add Website</span>
+            </button>
+          </div>
         </div>
 
         <div class="candidates-grid">
@@ -366,8 +372,9 @@ function renderCandidateCard(industryId, cand) {
       </div>
 
       <div class="card-content">
+        <!-- Title & Rescan Alternative Row -->
         <div class="card-title-row">
-          <h3 class="card-title">${cand.title || 'Untitled Candidate'}</h3>
+          <h3 class="card-title">${escapeQuotes(cand.title || 'Untitled Candidate')}</h3>
           <div style="display:flex; align-items:center; gap:6px;">
             <button class="btn-rescan" id="btn-rescan-${cand.id}" onclick="rescanCandidateSlot('${cand.id}')" title="AI will discover another website for this slot">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
@@ -377,13 +384,13 @@ function renderCandidateCard(industryId, cand) {
         </div>
 
         <div class="card-notes">
-          ${cand.notes || 'Visual analysis: Modern layout with strong responsive typography.'}
+          ${escapeQuotes(cand.notes || 'Visual analysis: Modern layout with strong responsive typography.')}
         </div>
 
         <!-- URL Verification & Edit Bar -->
         <div class="url-control-block">
           <div class="url-input-container">
-            <input type="text" class="url-field" id="url-${cand.id}" value="${cand.url}" spellcheck="false">
+            <input type="text" class="url-field" id="url-${cand.id}" value="${cand.url}" spellcheck="false" placeholder="https://...">
             <button class="btn-inline-action btn-verify" onclick="verifyCandidateUrl('${cand.id}')">Verify Link</button>
             <button class="btn-inline-action" onclick="saveCandidateUrl('${cand.id}')">Save</button>
           </div>
@@ -398,8 +405,6 @@ function renderCandidateCard(industryId, cand) {
           </button>
           <span style="font-size:11px; color:#94a3b8; font-family:monospace;">${cand.status === 'rescanned' ? '• Rescanned' : '• Verified'}</span>
         </div>
-
-        
 
         <!-- Expandable History Drawer -->
         <div class="history-drawer hidden" id="history-${cand.id}">
@@ -479,18 +484,26 @@ function renderCandidateCard(industryId, cand) {
 
           <div class="card-actions-right">
             ${cand.isCrawled ? `
-            <button class="btn-recrawl" onclick="crawlSingleSite('${industryId}', ${cand.rank}, '${cand.id}')" title="Re-crawl this individual website now">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
-              <span>Re-crawl Site</span>
+            <button class="btn-recrawl" onclick="crawlSingleSite('${industryId}', ${cand.rank}, '${cand.id}', false)" title="Re-crawl this individual website now">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+              <span>Re-crawl</span>
+            </button>
+            <button class="btn-aggressive" onclick="crawlSingleSite('${industryId}', ${cand.rank}, '${cand.id}', true)" title="Aggressive 100% Re-crawl: Deep multi-pass asset healing, clean slate wipe, and lazyload normalization">
+              <span class="flame-icon">🔥</span>
+              <span>Aggressive</span>
             </button>
             <button class="btn-delete-action" onclick="openDeleteModal('${industryId}', ${cand.rank}, '${cand.id}', '${escapeQuotes(cand.title)}')" title="Delete crawled static files">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
               <span>Delete</span>
             </button>
             ` : `
-            <button class="btn-crawl-primary" onclick="crawlSingleSite('${industryId}', ${cand.rank}, '${cand.id}')" title="Crawl this individual website now">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+            <button class="btn-crawl-primary" onclick="crawlSingleSite('${industryId}', ${cand.rank}, '${cand.id}', false)" title="Crawl this individual website now">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
               <span>Crawl This Site</span>
+            </button>
+            <button class="btn-aggressive" onclick="crawlSingleSite('${industryId}', ${cand.rank}, '${cand.id}', true)" title="Aggressive 100% Crawl: Deep multi-pass asset healing, lazyload normalization, and Webflow sanitization">
+              <span class="flame-icon">🔥</span>
+              <span>Aggressive</span>
             </button>
             `}
           </div>
@@ -577,7 +590,7 @@ window.toggleApproval = async function(candId, newApproved) {
 };
 
 // Crawl Single Candidate with Real-Time Progress Bar
-window.crawlSingleSite = async function(industryId, rank, candId) {
+window.crawlSingleSite = async function(industryId, rank, candId, isAggressive = false) {
   const input = document.getElementById(`url-${candId}`);
   const url = input.value.trim();
 
@@ -596,13 +609,13 @@ window.crawlSingleSite = async function(industryId, rank, candId) {
     if (actions) actions.style.display = 'none';
   }
 
-  showToast(`Starting deep crawl for #${rank}: ${url}`, 'info');
+  showToast(isAggressive ? `🔥 Starting AGGRESSIVE deep crawl for #${rank}: ${url}` : `Starting deep crawl for #${rank}: ${url}`, 'info');
 
   try {
     const res = await fetch('/api/crawl/single', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ candidateId: candId, industryId, rank, url })
+      body: JSON.stringify({ candidateId: candId, industryId, rank, url, aggressive: Boolean(isAggressive) })
     });
     const data = await res.json();
     if (!data.success) {
@@ -850,3 +863,149 @@ function closeDeleteModal() {
   pendingDeleteTarget = null;
   if (deleteDom.modal) deleteDom.modal.classList.add('hidden');
 }
+
+
+// Toggle Card Tools Drawer
+window.toggleCardTools = function(candId) {
+  const drawer = document.getElementById(`tools-drawer-${candId}`);
+  const btn = document.getElementById(`btn-tools-${candId}`);
+  if (drawer) {
+    drawer.classList.toggle('hidden');
+    if (btn) btn.classList.toggle('active');
+  }
+};
+
+// Add Website Modal Handlers
+window.openAddWebsiteModal = function(industryId, industryName) {
+  const modal = document.getElementById('add-website-modal');
+  const indIdInput = document.getElementById('add-site-industry-id');
+  const titleElem = document.getElementById('add-modal-title');
+  const badgeElem = document.getElementById('add-modal-badge');
+  const statusElem = document.getElementById('add-site-url-status');
+  const form = document.getElementById('add-website-form');
+
+  if (form) form.reset();
+  if (statusElem) {
+    statusElem.className = 'form-help-status';
+    statusElem.innerText = '';
+  }
+
+  if (indIdInput) indIdInput.value = industryId;
+  if (titleElem) titleElem.innerText = `Add Website to ${industryName || industryId}`;
+  if (badgeElem) badgeElem.innerText = `INDUSTRY: ${industryId.toUpperCase()}`;
+
+  // Suggest next rank
+  const ind = state.industries.find(i => i.id === industryId);
+  const nextRank = ind ? (ind.candidates.length + 1) : 1;
+  const rankInput = document.getElementById('add-site-rank');
+  if (rankInput) rankInput.value = nextRank;
+
+  if (modal) modal.classList.remove('hidden');
+};
+
+window.closeAddWebsiteModal = function() {
+  const modal = document.getElementById('add-website-modal');
+  if (modal) modal.classList.add('hidden');
+};
+
+let inspectDebounceTimer = null;
+window.handleUrlInputPreview = function(urlVal) {
+  clearTimeout(inspectDebounceTimer);
+  const statusElem = document.getElementById('add-site-url-status');
+  if (!urlVal || urlVal.length < 6) {
+    if (statusElem) statusElem.innerText = '';
+    return;
+  }
+  inspectDebounceTimer = setTimeout(() => {
+    checkAddWebsiteUrl();
+  }, 700);
+};
+
+window.checkAddWebsiteUrl = async function() {
+  const urlInput = document.getElementById('add-site-url');
+  const titleInput = document.getElementById('add-site-title');
+  const statusElem = document.getElementById('add-site-url-status');
+  const urlVal = (urlInput ? urlInput.value : '').trim();
+  if (!urlVal) return;
+
+  if (statusElem) {
+    statusElem.className = 'form-help-status checking';
+    statusElem.innerText = '🔍 Pinging URL and verifying accessibility...';
+  }
+
+  try {
+    const res = await fetch('/api/candidate/inspect-url', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url: urlVal })
+    });
+    const data = await res.json();
+    if (data.success) {
+      if (statusElem) {
+        statusElem.className = 'form-help-status success';
+        statusElem.innerText = `✓ Verified HTTP ${data.status || 200}: "${data.title || 'Live Website'}"`;
+      }
+      if (titleInput && (!titleInput.value || titleInput.value.trim() === '')) {
+        titleInput.value = data.title || '';
+      }
+    } else {
+      if (statusElem) {
+        statusElem.className = 'form-help-status error';
+        statusElem.innerText = `⚠️ Warning: ${data.error || 'Could not verify URL'}`;
+      }
+    }
+  } catch (err) {
+    if (statusElem) {
+      statusElem.className = 'form-help-status error';
+      statusElem.innerText = '⚠️ Could not reach server to test URL';
+    }
+  }
+};
+
+window.submitAddWebsite = async function(e) {
+  e.preventDefault();
+  const industryId = document.getElementById('add-site-industry-id').value;
+  const url = document.getElementById('add-site-url').value.trim();
+  const title = document.getElementById('add-site-title').value.trim();
+  const rank = document.getElementById('add-site-rank').value.trim();
+  const notes = document.getElementById('add-site-notes').value.trim();
+  const btn = document.getElementById('btn-submit-add-site');
+  const btnText = document.getElementById('btn-submit-add-site-text');
+
+  if (!url) {
+    showToast('Please enter a valid website URL', 'error');
+    return;
+  }
+
+  if (btn) btn.classList.add('loading');
+  if (btnText) btnText.innerText = 'Capturing Preview & Adding...';
+
+  try {
+    const res = await fetch('/api/candidate/add', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ industryId, url, title, rank, notes })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast(data.message || 'Website added successfully!', 'success');
+      closeAddWebsiteModal();
+      await fetchState();
+      setTimeout(() => {
+        const newCard = document.getElementById(`card-${data.candidate.id}`);
+        if (newCard) {
+          newCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          newCard.classList.add('highlight-glow');
+          setTimeout(() => newCard.classList.remove('highlight-glow'), 2500);
+        }
+      }, 300);
+    } else {
+      showToast(data.error || 'Failed to add website', 'error');
+    }
+  } catch (err) {
+    showToast('Network error while adding candidate', 'error');
+  } finally {
+    if (btn) btn.classList.remove('loading');
+    if (btnText) btnText.innerText = 'Add to Pipeline';
+  }
+};

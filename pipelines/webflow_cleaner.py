@@ -27,4 +27,4 @@ def clean_webflow_directory(dest_dir):
                         fl.write(new_text)
                     count += 1
     print(f"[WEBFLOW CLEANER] Sanitized Webflow interactions in {count} HTML pages.")
-    return count\n
+    return count

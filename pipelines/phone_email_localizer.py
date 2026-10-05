@@ -24,4 +24,4 @@ def scan_contact_info(dest_dir):
                 contacts['emails'].update(mailtos)
 
     print(f"[CONTACT SCANNER] Discovered {len(contacts['phones'])} phones and {len(contacts['emails'])} emails.")
-    return contacts\n
+    return contacts

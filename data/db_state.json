@@ -226,8 +226,8 @@
     },
     {
       "id": "cafe",
-      "name": "Café / Coffee Shop",
-      "query": "café / coffee shop contractor services Direct trade single origin espresso oat milk lattes modern award",
+      "name": "Caf\u00e9 / Coffee Shop",
+      "query": "caf\u00e9 / coffee shop contractor services Direct trade single origin espresso oat milk lattes modern award",
       "status": "pending",
       "updated_at": "2026-10-01T10:25:00.000Z"
     },
@@ -377,7 +377,7 @@
       "notes": "Evaluated via heuristic fallback: Electrician Services For Businesses & Facilities in NH | Spark Electric",
       "approved": 0,
       "status": "scouted",
-      "skipCrawl": true
+      "skipCrawl": false
     },
     {
       "id": 1790853659917,
@@ -516,10 +516,10 @@
       "industry_id": "tattoo-studio",
       "url": "https://wonderkin.michael-aust.com/",
       "rank": 1,
-      "title": "Wonderkin Tattoo | Dein Tattoostudio für kreative und einzigartige Designs",
+      "title": "Wonderkin Tattoo | Dein Tattoostudio f\u00fcr kreative und einzigartige Designs",
       "screenshot_path": "/screenshots/tattoo-studio_1.jpg",
       "score": 8,
-      "notes": "Evaluated via heuristic fallback: Wonderkin Tattoo | Dein Tattoostudio für kreative und einzigartige Designs",
+      "notes": "Evaluated via heuristic fallback: Wonderkin Tattoo | Dein Tattoostudio f\u00fcr kreative und einzigartige Designs",
       "approved": 1,
       "status": "scouted"
     },

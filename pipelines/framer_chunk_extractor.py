@@ -44,4 +44,4 @@ def extract_framer_assets(dest_dir):
         if ok:
             downloaded += 1
     print(f"[FRAMER EXTRACTOR] Downloaded {downloaded} Framer assets.")
-    return downloaded\n
+    return downloaded
